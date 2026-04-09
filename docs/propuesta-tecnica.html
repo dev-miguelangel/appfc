@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppFC — Propuesta Tecnica</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:   #f0c040;
+      --gold2:  #c8860a;
+      --green:  #00d068;
+      --green2: #007a40;
+      --blue:   #3b82f6;
+      --purple: #8b5cf6;
+      --red:    #ef4444;
+      --dark:   #080c14;
+      --dark2:  #0d1520;
+      --dark3:  #111d2e;
+      --mid:    #1a2a40;
+      --mid2:   #243550;
+      --border: rgba(255,255,255,.07);
+      --light:  #cdd8e8;
+      --white:  #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--white);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── SIDEBAR NAV ─────────────────────────────── */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0;
+      width: 230px;
+      background: var(--dark2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 1.6rem 1.4rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo .name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: .1em;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .sidebar-logo .sub {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(205,216,232,.4);
+      margin-top: .2rem;
+    }
+    .nav-group { padding: .8rem 0; border-bottom: 1px solid var(--border); }
+    .nav-group-label {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(205,216,232,.35);
+      padding: .4rem 1.4rem .6rem;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .5rem 1.4rem;
+      color: var(--light);
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 500;
+      transition: background .15s, color .15s;
+      border-left: 2px solid transparent;
+    }
+    .nav-link:hover { background: rgba(240,192,64,.06); color: var(--gold); border-left-color: var(--gold); }
+    .nav-link .icon { font-size: 1rem; width: 18px; text-align: center; }
+
+    .sidebar-meta {
+      margin-top: auto;
+      padding: 1rem 1.4rem;
+      border-top: 1px solid var(--border);
+      font-size: .7rem;
+      color: rgba(205,216,232,.3);
+    }
+    .sidebar-meta strong { color: rgba(205,216,232,.6); }
+
+    /* ── MAIN ────────────────────────────────────── */
+    main { margin-left: 230px; }
+
+    /* ── PAGE HEADER ─────────────────────────────── */
+    .page-header {
+      padding: 4rem 4rem 3rem;
+      background: linear-gradient(135deg, var(--dark2) 0%, var(--dark) 100%);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header::after {
+      content: '';
+      position: absolute; right: -80px; top: -80px;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,192,64,.05), transparent 65%);
+    }
+    .doc-tag {
+      display: inline-block;
+      background: rgba(240,192,64,.1);
+      border: 1px solid rgba(240,192,64,.25);
+      color: var(--gold);
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: .3rem .8rem;
+      border-radius: 2px;
+      margin-bottom: 1rem;
+    }
+    .page-header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.2rem;
+      letter-spacing: .05em;
+      line-height: 1;
+      margin-bottom: .5rem;
+    }
+    .page-header h1 span { color: var(--gold); }
+    .page-header .lead {
+      color: var(--light);
+      font-size: 1rem;
+      max-width: 620px;
+    }
+    .header-meta {
+      display: flex; gap: 2.5rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .meta-item { }
+    .meta-key {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(205,216,232,.4);
+      margin-bottom: .2rem;
+    }
+    .meta-val { font-size: .88rem; font-weight: 600; }
+
+    /* ── SECTIONS ────────────────────────────────── */
+    .doc-section {
+      padding: 3.5rem 4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-section:last-child { border-bottom: none; }
+
+    .section-anchor { scroll-margin-top: 1.5rem; }
+
+    .section-header { margin-bottom: 2rem; }
+    .section-tag {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .5rem;
+    }
+    .section-header h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: .04em;
+      line-height: 1;
+    }
+    .section-header p {
+      color: var(--light);
+      margin-top: .6rem;
+      max-width: 640px;
+    }
+
+    /* ── STACK GRID ──────────────────────────────── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .stack-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem;
+      transition: border-color .2s, background .2s;
+    }
+    .stack-card:hover { border-color: rgba(240,192,64,.3); background: var(--mid); }
+    .stack-card-top {
+      display: flex; align-items: center; gap: .7rem;
+      margin-bottom: .7rem;
+    }
+    .stack-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .stack-name { font-weight: 700; font-size: .9rem; }
+    .stack-version {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--green);
+      text-transform: uppercase;
+    }
+    .stack-desc { font-size: .78rem; color: var(--light); line-height: 1.5; }
+
+    /* ── ARCH DIAGRAM ────────────────────────────── */
+    .arch-diagram {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      overflow-x: auto;
+    }
+
+    /* ── DB DIAGRAM (SVG) ────────────────────────── */
+    .db-wrap {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .db-wrap svg { display: block; max-width: 100%; }
+
+    /* ── TABLE COMPONENT ─────────────────────────── */
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .84rem;
+    }
+    .doc-table th {
+      background: var(--mid);
+      color: var(--gold);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: .7rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-table td {
+      padding: .7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--light);
+      vertical-align: top;
+    }
+    .doc-table tr:last-child td { border-bottom: none; }
+    .doc-table tr:hover td { background: rgba(255,255,255,.02); }
+    .doc-table td:first-child { color: var(--white); font-weight: 600; }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    /* ── CODE BLOCK ──────────────────────────────── */
+    .code-block {
+      background: #0a0f1a;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1.2rem 0;
+    }
+    .code-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .5rem 1rem;
+      background: var(--mid);
+      border-bottom: 1px solid var(--border);
+      font-size: .72rem;
+    }
+    .code-lang { color: var(--gold); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .code-file { color: rgba(205,216,232,.4); font-family: 'JetBrains Mono', monospace; }
+    pre {
+      padding: 1.2rem 1.4rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .8rem;
+      line-height: 1.65;
+      color: #c9d8f0;
+    }
+    .kw  { color: #c792ea; }
+    .fn  { color: #82aaff; }
+    .str { color: #c3e88d; }
+    .cm  { color: #546e7a; font-style: italic; }
+    .tp  { color: #ffcb6b; }
+    .op  { color: #89ddff; }
+    .num { color: #f78c6c; }
+
+    /* ── BADGE ───────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: .2rem .6rem;
+      border-radius: 3px;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .badge-gold   { background: rgba(240,192,64,.15); color: var(--gold); border: 1px solid rgba(240,192,64,.3); }
+    .badge-green  { background: rgba(0,208,104,.12); color: var(--green); border: 1px solid rgba(0,208,104,.25); }
+    .badge-blue   { background: rgba(59,130,246,.12); color: #93c5fd; border: 1px solid rgba(59,130,246,.25); }
+    .badge-purple { background: rgba(139,92,246,.12); color: #c4b5fd; border: 1px solid rgba(139,92,246,.25); }
+    .badge-red    { background: rgba(239,68,68,.12); color: #fca5a5; border: 1px solid rgba(239,68,68,.25); }
+
+    /* ── CALLOUT ─────────────────────────────────── */
+    .callout {
+      border-left: 3px solid;
+      padding: .9rem 1.2rem;
+      border-radius: 0 6px 6px 0;
+      font-size: .86rem;
+      margin: 1.2rem 0;
+    }
+    .callout-gold  { border-color: var(--gold);   background: rgba(240,192,64,.05); }
+    .callout-green { border-color: var(--green);  background: rgba(0,208,104,.05); }
+    .callout-blue  { border-color: var(--blue);   background: rgba(59,130,246,.05); }
+    .callout-title { font-weight: 700; margin-bottom: .3rem; }
+    .callout-gold  .callout-title { color: var(--gold); }
+    .callout-green .callout-title { color: var(--green); }
+    .callout-blue  .callout-title { color: #93c5fd; }
+
+    /* ── RULES ───────────────────────────────────── */
+    .rules-list { display: flex; flex-direction: column; gap: .8rem; margin-top: 1rem; }
+    .rule-item {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      transition: border-color .2s;
+    }
+    .rule-item:hover { border-color: rgba(240,192,64,.2); }
+    .rule-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      color: rgba(240,192,64,.25);
+      line-height: 1;
+      min-width: 32px;
+    }
+    .rule-content {}
+    .rule-title { font-weight: 700; font-size: .88rem; margin-bottom: .25rem; }
+    .rule-desc { font-size: .82rem; color: var(--light); line-height: 1.5; }
+
+    /* ── PLANS ───────────────────────────────────── */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.2rem;
+      margin-top: 1.5rem;
+    }
+    .plan-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      transition: transform .2s, border-color .2s;
+    }
+    .plan-card:hover { transform: translateY(-3px); }
+    .plan-card.featured { border-color: var(--gold); }
+    .plan-card.featured::before {
+      content: 'RECOMENDADO';
+      position: absolute; top: 0; right: 0;
+      background: var(--gold);
+      color: var(--dark);
+      font-size: .6rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      padding: .25rem .6rem;
+      border-radius: 0 10px 0 6px;
+    }
+    .plan-header { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid var(--border); }
+    .plan-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: .08em;
+    }
+    .plan-name.free   { color: var(--light); }
+    .plan-name.pro    { color: var(--gold); }
+    .plan-name.club   { color: var(--green); }
+    .plan-name.league { color: var(--purple); }
+    .plan-price {
+      margin-top: .4rem;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.6rem;
+      line-height: 1;
+    }
+    .plan-price .currency { font-size: 1.2rem; vertical-align: top; margin-top: .4rem; display: inline-block; }
+    .plan-price .period { font-size: .9rem; color: var(--light); font-family: 'Inter', sans-serif; font-weight: 500; }
+    .plan-target { font-size: .78rem; color: rgba(205,216,232,.5); margin-top: .3rem; }
+    .plan-features { padding: 1.2rem 1.5rem; }
+    .plan-feature {
+      display: flex; align-items: flex-start; gap: .6rem;
+      font-size: .82rem;
+      margin-bottom: .6rem;
+      color: var(--light);
+    }
+    .plan-feature .check { flex-shrink: 0; margin-top: 1px; }
+    .check-yes { color: var(--green); }
+    .check-no  { color: rgba(205,216,232,.2); }
+    .plan-feature.disabled { opacity: .35; }
+
+    /* ── TIMELINE ────────────────────────────────── */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: '';
+      position: absolute; left: 6px; top: 6px; bottom: 6px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--gold), var(--green));
+      opacity: .3;
+    }
+    .tl-item { position: relative; padding-bottom: 2rem; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-dot {
+      position: absolute; left: -2rem; top: 4px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: var(--dark2);
+    }
+    .tl-dot.green { border-color: var(--green); }
+    .tl-dot.blue  { border-color: var(--blue); }
+    .tl-phase {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .25rem;
+    }
+    .tl-phase.green { color: var(--green); }
+    .tl-phase.blue  { color: #93c5fd; }
+    .tl-title { font-weight: 700; font-size: .95rem; margin-bottom: .4rem; }
+    .tl-desc { font-size: .82rem; color: var(--light); }
+    .tl-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+
+    /* ── SCALE GRID ──────────────────────────────── */
+    .scale-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .scale-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.4rem;
+    }
+    .scale-icon { font-size: 1.8rem; margin-bottom: .8rem; }
+    .scale-title { font-weight: 700; font-size: .9rem; margin-bottom: .4rem; }
+    .scale-desc { font-size: .78rem; color: var(--light); line-height: 1.5; }
+    .scale-metric {
+      display: inline-block;
+      margin-top: .6rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+      color: var(--green);
+      background: rgba(0,208,104,.08);
+      padding: .2rem .5rem;
+      border-radius: 3px;
+    }
+
+    /* ── TWO COL ─────────────────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── UTILS ───────────────────────────────────── */
+    .mt-1 { margin-top: .5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mt-4 { margin-top: 2rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    h3 { font-size: .88rem; font-weight: 700; color: var(--white); margin-bottom: .6rem; }
+    p { color: var(--light); font-size: .86rem; line-height: 1.65; }
+
+    @media (max-width: 760px) {
+      .sidebar { display: none; }
+      main { margin-left: 0; }
+      .doc-section { padding: 2rem 1.5rem; }
+      .page-header { padding: 2.5rem 1.5rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="name">App<span style="color:#fff">FC</span></div>
+    <div class="sub">Propuesta Tecnica</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Documento</div>
+    <a href="#resumen"     class="nav-link"><span class="icon">📋</span> Resumen</a>
+    <a href="#stack"       class="nav-link"><span class="icon">⚙️</span> Stack tecnico</a>
+    <a href="#arquitectura" class="nav-link"><span class="icon">🏗️</span> Arquitectura</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Diseno</div>
+    <a href="#database"    class="nav-link"><span class="icon">🗄️</span> Base de datos</a>
+    <a href="#lugares"     class="nav-link"><span class="icon">📍</span> Tabla Lugares</a>
+    <a href="#rls"         class="nav-link"><span class="icon">🔐</span> Seguridad RLS</a>
+    <a href="#auth"        class="nav-link"><span class="icon">🔑</span> Autenticacion</a>
+    <a href="#realtime"    class="nav-link"><span class="icon">⚡</span> Realtime</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Negocio</div>
+    <a href="#reglas"      class="nav-link"><span class="icon">📜</span> Reglas negocio</a>
+    <a href="#monetizacion" class="nav-link"><span class="icon">💰</span> Monetizacion</a>
+    <a href="#escalamiento" class="nav-link"><span class="icon">📈</span> Escalamiento</a>
+    <a href="#roadmap"     class="nav-link"><span class="icon">🗺️</span> Roadmap</a>
+  </div>
+
+  <div class="sidebar-meta">
+    <div><strong>Version:</strong> 1.0</div>
+    <div><strong>Fecha:</strong> Abril 2026</div>
+    <div><strong>Estado:</strong> Borrador</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="doc-tag">Documento tecnico v1.0</div>
+    <h1>AppFC — <span>Propuesta</span> Tecnica</h1>
+    <p class="lead">
+      Arquitectura completa para el MVP de AppFC utilizando Angular 20, Supabase y despliegue en Vercel. Incluye modelo de datos, reglas de seguridad, plan de monetizacion freemium y hoja de ruta de escalamiento.
+    </p>
+    <div class="header-meta">
+      <div class="meta-item">
+        <div class="meta-key">Frontend</div>
+        <div class="meta-val">Angular 20</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Backend / DB</div>
+        <div class="meta-val">Supabase (PostgreSQL)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Hosting</div>
+        <div class="meta-val">Vercel + Supabase Cloud</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Target</div>
+        <div class="meta-val">Chile · MVP</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Alcance estimado</div>
+        <div class="meta-val">8 semanas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 1. RESUMEN ───────────────────────────────────── -->
+  <section class="doc-section section-anchor" id="resumen">
+    <div class="section-header">
+      <div class="section-tag">01 · Resumen ejecutivo</div>
+      <h2>Vision tecnica</h2>
+      <p>AppFC es una SPA Angular servida en Vercel. Todo el backend vive en Supabase: base de datos PostgreSQL, autenticacion OAuth, storage para avatares y canales realtime para notificaciones en vivo. No se requiere servidor propio para el MVP.</p>
+    </div>
+
+    <div class="callout callout-gold">
+      <div class="callout-title">Principio de diseno</div>
+      Cero servidores propios en v1. Supabase actua como BaaS completo. Angular consume la API de Supabase directamente desde el cliente usando Row Level Security para garantizar que cada usuario solo accede a sus propios datos.
+    </div>
+
+    <div class="two-col mt-4">
+      <div>
+        <h3>Lo que resuelve esta arquitectura</h3>
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Sin servidor intermedio</div>
+              <div class="rule-desc">Angular llama directo a Supabase. Menos latencia, menos infra, menos costo en fase inicial.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Seguridad por defecto</div>
+              <div class="rule-desc">Row Level Security en PostgreSQL garantiza aislamiento de datos sin logica adicional en el frontend.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Escalable cuando sea necesario</div>
+              <div class="rule-desc">Se puede agregar Edge Functions de Supabase para logica de negocio compleja sin redisenar la arquitectura.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Metricas objetivo MVP</h3>
+        <div class="table-wrap mt-2">
+          <table class="doc-table">
+            <thead><tr><th>Metrica</th><th>Objetivo</th></tr></thead>
+            <tbody>
+              <tr><td>Tiempo de carga inicial</td><td>< 2s (LCP)</td></tr>
+              <tr><td>Usuarios concurrentes</td><td>500 (free tier)</td></tr>
+              <tr><td>Disponibilidad</td><td>99.5% (Supabase SLA)</td></tr>
+              <tr><td>Latencia DB queries</td><td>< 100ms</td></tr>
+              <tr><td>Costo mensual MVP</td><td>$0 (free tiers)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. STACK ─────────────────────────────────────── -->
+  <section class="doc-section section-anchor" id="stack">
+    <div class="section-header">
+      <div class="section-tag">02 · Stack tecnico</div>
+      <h2>Tecnologias seleccionadas</h2>
+      <p>Cada eleccion prioriza velocidad de desarrollo, costo cero en fase inicial y curva de aprendizaje baja para un equipo pequeno.</p>
+    </div>
+
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(221,0,49,.12)">🅰️</div>
+          <div>
+            <div class="stack-name">Angular</div>
+            <div class="stack-version">v20 Stable</div>
+          </div>
+        </div>
+        <div class="stack-desc">SPA con Signals API, standalone components, SSR opcional con Angular Universal. HttpClient + resource() para data fetching reactivo.</div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(62,207,142,.1)">⚡</div>
+          <div>
+            <div class="stack-name">Supabase</div>
+            <div class="stack-version">BaaS completo</div>
+          </div>
+        </div>
+        <div class="stack-desc">PostgreSQL + Auth (OAuth Google) + Realtime + Storage + Edge Functions. SDK oficial para Angular/JS.</div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(255,255,255,.06)">▲</div>
+          <div>
+            <div class="stack-name">Vercel</div>
+            <div class="stack-version">Hosting / CDN</div>
+          </div>
+        </div>
+        <div class="stack-desc">Deploy automatico desde GitHub. Edge Network global. Free tier para proyectos personales.</div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(59,130,246,.1)">🔷</div>
+          <div>
+            <div class="stack-name">TypeScript</div>
+            <div class="stack-version">5.x strict</div>
+          </div>
+        </div>
+        <div class="stack-desc">Strict mode activado. Tipos generados automaticamente desde el esquema Supabase con supabase gen types.</div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(56,178,172,.1)">🎨</div>
+          <div>
+            <div class="stack-name">Tailwind CSS</div>
+            <div class="stack-version">v4</div>
+          </div>
+        </div>
+        <div class="stack-desc">Utility-first CSS. Integrado nativamente con Angular CLI. Zero runtime.</div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(240,192,64,.1)">🔑</div>
+          <div>
+            <div class="stack-name">Supabase Auth</div>
+            <div class="stack-version">OAuth 2.0</div>
+          </div>
+        </div>
+        <div class="stack-desc">Login con Google. JWT firmados. Refresh tokens automaticos. Guard funcional en Angular Router.</div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(168,85,247,.1)">🧪</div>
+          <div>
+            <div class="stack-name">Vitest + Playwright</div>
+            <div class="stack-version">Testing</div>
+          </div>
+        </div>
+        <div class="stack-desc">Unit tests con Vitest (reemplaza Karma). E2E con Playwright contra Supabase local.</div>
+      </div>
+
+      <div class="stack-card">
+        <div class="stack-card-top">
+          <div class="stack-icon" style="background:rgba(0,208,104,.1)">🛠️</div>
+          <div>
+            <div class="stack-name">Supabase CLI</div>
+            <div class="stack-version">Local dev</div>
+          </div>
+        </div>
+        <div class="stack-desc">Instancia local con Docker para desarrollo. Migraciones versionadas. Seed de datos de prueba.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. ARQUITECTURA ──────────────────────────────── -->
+  <section class="doc-section section-anchor" id="arquitectura">
+    <div class="section-header">
+      <div class="section-tag">03 · Arquitectura</div>
+      <h2>Diagrama de capas</h2>
+      <p>Arquitectura BaaS sin servidor propio. El cliente Angular consume Supabase directamente. La logica de negocio sensible vive en Edge Functions o en RLS policies de PostgreSQL.</p>
+    </div>
+
+    <!-- Arch ASCII/SVG -->
+    <div class="arch-diagram">
+      <svg width="100%" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="rgba(240,192,64,.6)"/>
+          </marker>
+          <marker id="arrowb" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="rgba(0,208,104,.5)"/>
+          </marker>
+        </defs>
+
+        <!-- BROWSER -->
+        <rect x="30" y="30" width="200" height="360" rx="8" fill="#111d2e" stroke="rgba(240,192,64,.3)" stroke-width="1.5"/>
+        <text x="130" y="56" fill="#f0c040" font-size="11" font-weight="bold" text-anchor="middle" letter-spacing="2">BROWSER</text>
+        <rect x="50" y="68" width="160" height="50" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+        <text x="130" y="89" fill="#cdd8e8" font-size="10" text-anchor="middle">Angular 20 App</text>
+        <text x="130" y="105" fill="rgba(205,216,232,.45)" font-size="9" text-anchor="middle">Signals · Standalone</text>
+
+        <rect x="50" y="130" width="160" height="40" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="130" y="153" fill="#cdd8e8" font-size="10" text-anchor="middle">Angular Router</text>
+
+        <rect x="50" y="182" width="160" height="40" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="130" y="205" fill="#cdd8e8" font-size="10" text-anchor="middle">Supabase JS Client</text>
+
+        <rect x="50" y="234" width="75" height="36" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="87" y="255" fill="#82aaff" font-size="9" text-anchor="middle">Auth Service</text>
+
+        <rect x="135" y="234" width="75" height="36" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="172" y="255" fill="#82aaff" font-size="9" text-anchor="middle">DB Service</text>
+
+        <rect x="50" y="282" width="160" height="36" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="130" y="305" fill="#c792ea" font-size="9" text-anchor="middle">Realtime Subscriptions</text>
+
+        <rect x="50" y="330" width="160" height="40" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="130" y="353" fill="#cdd8e8" font-size="9" text-anchor="middle">Tailwind + Components</text>
+
+        <!-- SUPABASE CLOUD -->
+        <rect x="320" y="30" width="340" height="360" rx="8" fill="#111d2e" stroke="rgba(62,207,142,.3)" stroke-width="1.5"/>
+        <text x="490" y="56" fill="#00d068" font-size="11" font-weight="bold" text-anchor="middle" letter-spacing="2">SUPABASE CLOUD</text>
+
+        <rect x="340" y="68" width="140" height="50" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+        <text x="410" y="89" fill="#cdd8e8" font-size="10" text-anchor="middle">Auth (OAuth)</text>
+        <text x="410" y="105" fill="rgba(205,216,232,.45)" font-size="9" text-anchor="middle">JWT · Google</text>
+
+        <rect x="500" y="68" width="140" height="50" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+        <text x="570" y="89" fill="#cdd8e8" font-size="10" text-anchor="middle">Storage</text>
+        <text x="570" y="105" fill="rgba(205,216,232,.45)" font-size="9" text-anchor="middle">Avatares · S3-like</text>
+
+        <rect x="340" y="132" width="300" height="60" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+        <text x="490" y="155" fill="#cdd8e8" font-size="10" text-anchor="middle">PostgreSQL 17</text>
+        <text x="490" y="172" fill="rgba(205,216,232,.45)" font-size="9" text-anchor="middle">Row Level Security · Funciones · Indices</text>
+
+        <rect x="340" y="206" width="140" height="50" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+        <text x="410" y="227" fill="#cdd8e8" font-size="10" text-anchor="middle">Realtime</text>
+        <text x="410" y="243" fill="rgba(205,216,232,.45)" font-size="9" text-anchor="middle">WebSockets · CDC</text>
+
+        <rect x="500" y="206" width="140" height="50" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+        <text x="570" y="227" fill="#cdd8e8" font-size="10" text-anchor="middle">Edge Functions</text>
+        <text x="570" y="243" fill="rgba(205,216,232,.45)" font-size="9" text-anchor="middle">Deno · Webhooks</text>
+
+        <rect x="340" y="270" width="300" height="40" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="490" y="294" fill="#ffcb6b" font-size="9" text-anchor="middle">PostgREST API (autogenerada del schema)</text>
+
+        <rect x="340" y="322" width="300" height="40" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="490" y="346" fill="rgba(205,216,232,.45)" font-size="9" text-anchor="middle">pg_cron · pg_net · pg_vector (futuro)</text>
+
+        <!-- VERCEL -->
+        <rect x="750" y="30" width="130" height="160" rx="8" fill="#111d2e" stroke="rgba(255,255,255,.2)" stroke-width="1.5"/>
+        <text x="815" y="56" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" letter-spacing="2">VERCEL</text>
+        <rect x="765" y="68" width="100" height="40" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="815" y="90" fill="#cdd8e8" font-size="9" text-anchor="middle">CDN Global</text>
+        <rect x="765" y="118" width="100" height="40" rx="5" fill="#1a2a40" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+        <text x="815" y="140" fill="#cdd8e8" font-size="9" text-anchor="middle">CI / Deploy</text>
+        <text x="815" y="155" fill="rgba(205,216,232,.4)" font-size="8" text-anchor="middle">GitHub Actions</text>
+
+        <!-- ARROWS -->
+        <!-- Browser → Supabase -->
+        <line x1="230" y1="202" x2="318" y2="202" stroke="rgba(240,192,64,.5)" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+        <text x="274" y="196" fill="rgba(240,192,64,.7)" font-size="8" text-anchor="middle">HTTPS / WS</text>
+
+        <!-- Browser → Vercel -->
+        <line x1="230" y1="88" x2="748" y2="88" stroke="rgba(255,255,255,.2)" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="4 3"/>
+        <text x="490" y="80" fill="rgba(255,255,255,.35)" font-size="8" text-anchor="middle">Sirve la app</text>
+
+        <!-- Supabase internal arrows -->
+        <line x1="490" y1="118" x2="490" y2="130" stroke="rgba(0,208,104,.3)" stroke-width="1" marker-end="url(#arrowb)"/>
+        <line x1="490" y1="192" x2="490" y2="204" stroke="rgba(0,208,104,.3)" stroke-width="1" marker-end="url(#arrowb)"/>
+        <line x1="490" y1="256" x2="490" y2="268" stroke="rgba(0,208,104,.3)" stroke-width="1" marker-end="url(#arrowb)"/>
+        <line x1="490" y1="310" x2="490" y2="320" stroke="rgba(0,208,104,.3)" stroke-width="1" marker-end="url(#arrowb)"/>
+      </svg>
+    </div>
+
+    <div class="callout callout-blue mt-3">
+      <div class="callout-title">Estructura de modulos Angular 20</div>
+      La app usa <strong>standalone components</strong> con lazy loading por ruta. Cada feature (partidos, equipos, perfil) es un modulo autonomo cargado bajo demanda. El estado global se maneja con <strong>Signals + signal stores</strong> sin NgRx.
+    </div>
+
+    <div class="code-block mt-3">
+      <div class="code-header">
+        <span class="code-lang">TypeScript</span>
+        <span class="code-file">app.routes.ts</span>
+      </div>
+<pre><span class="kw">export const</span> <span class="fn">routes</span>: <span class="tp">Routes</span> = [
+  { path: <span class="str">''</span>,         loadComponent: () => <span class="fn">import</span>(<span class="str">'./features/landing'</span>).<span class="fn">then</span>(m => m.<span class="tp">LandingComponent</span>) },
+  { path: <span class="str">'auth'</span>,      loadComponent: () => <span class="fn">import</span>(<span class="str">'./features/auth'</span>).<span class="fn">then</span>(m => m.<span class="tp">AuthComponent</span>) },
+  {
+    path: <span class="str">'app'</span>,
+    <span class="fn">canActivate</span>: [<span class="fn">authGuard</span>],  <span class="cm">// functional guard</span>
+    loadChildren: () => <span class="fn">import</span>(<span class="str">'./features/shell'</span>).<span class="fn">then</span>(m => m.<span class="tp">SHELL_ROUTES</span>)
+  },
+  { path: <span class="str">'**'</span>, redirectTo: <span class="str">''</span> }
+];
+
+<span class="cm">// Shell routes (lazy)</span>
+<span class="kw">export const</span> <span class="fn">SHELL_ROUTES</span>: <span class="tp">Routes</span> = [
+  { path: <span class="str">'dashboard'</span>,  loadComponent: () => <span class="fn">import</span>(<span class="str">'./dashboard'</span>)... },
+  { path: <span class="str">'equipos'</span>,    loadComponent: () => <span class="fn">import</span>(<span class="str">'./equipos'</span>)... },
+  { path: <span class="str">'partidos'</span>,   loadComponent: () => <span class="fn">import</span>(<span class="str">'./partidos'</span>)... },
+  { path: <span class="str">'perfil'</span>,     loadComponent: () => <span class="fn">import</span>(<span class="str">'./perfil'</span>)... },
+];</pre>
+    </div>
+  </section>
+
+  <!-- ── 4. BASE DE DATOS ─────────────────────────────── -->
+  <section class="doc-section section-anchor" id="database">
+    <div class="section-header">
+      <div class="section-tag">04 · Base de datos</div>
+      <h2>Diagrama entidad-relacion</h2>
+      <p>PostgreSQL 17 en Supabase. Las tablas <code style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:.82em">auth.users</code> son gestionadas por Supabase Auth. El resto vive en el schema <code style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:.82em">public</code>.</p>
+    </div>
+
+    <!-- ERD DIAGRAM -->
+    <div class="db-wrap">
+      <svg width="100%" viewBox="0 0 1100 800" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace" font-size="11">
+
+        <rect width="1100" height="800" fill="#0d1520"/>
+
+        <!-- GRID LINES -->
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,.025)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="1100" height="800" fill="url(#grid)"/>
+
+        <!-- ── TABLA: usuarios ── -->
+        <g transform="translate(30, 40)">
+          <rect width="200" height="220" rx="6" fill="#111d2e" stroke="rgba(240,192,64,.5)" stroke-width="1.5"/>
+          <rect width="200" height="30" rx="6" fill="rgba(240,192,64,.15)" stroke="rgba(240,192,64,.5)" stroke-width="1.5"/>
+          <rect width="200" height="24" y="6" fill="rgba(240,192,64,.15)"/>
+          <text x="100" y="20" fill="#f0c040" font-weight="bold" text-anchor="middle" font-size="12" letter-spacing="1">USUARIOS</text>
+
+          <line x1="0" y1="30" x2="200" y2="30" stroke="rgba(240,192,64,.3)" stroke-width="1"/>
+          <text x="12" y="48" fill="#ffcb6b" font-size="10">🔑 id</text>
+          <text x="105" y="48" fill="rgba(205,216,232,.4)">uuid (PK)</text>
+          <line x1="0" y1="55" x2="200" y2="55" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="72" fill="#cdd8e8">nombre</text>
+          <text x="105" y="72" fill="rgba(205,216,232,.4)">varchar(80)</text>
+          <line x1="0" y1="79" x2="200" y2="79" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="96" fill="#cdd8e8">edad</text>
+          <text x="105" y="96" fill="rgba(205,216,232,.4)">smallint</text>
+          <line x1="0" y1="103" x2="200" y2="103" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="120" fill="#cdd8e8">comuna</text>
+          <text x="105" y="120" fill="rgba(205,216,232,.4)">varchar(60)</text>
+          <line x1="0" y1="127" x2="200" y2="127" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="144" fill="#cdd8e8">posicion</text>
+          <text x="105" y="144" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="151" x2="200" y2="151" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="168" fill="#cdd8e8">foto_url</text>
+          <text x="105" y="168" fill="rgba(205,216,232,.4)">text</text>
+          <line x1="0" y1="175" x2="200" y2="175" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="192" fill="#00d068">rep_asistencia</text>
+          <text x="130" y="192" fill="rgba(205,216,232,.4)">numeric</text>
+          <line x1="0" y1="199" x2="200" y2="199" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="216" fill="#00d068">rep_puntualidad</text>
+          <text x="130" y="216" fill="rgba(205,216,232,.4)">numeric</text>
+        </g>
+
+        <!-- ── TABLA: equipos ── -->
+        <g transform="translate(310, 40)">
+          <rect width="200" height="160" rx="6" fill="#111d2e" stroke="rgba(59,130,246,.5)" stroke-width="1.5"/>
+          <rect width="200" height="30" rx="6" fill="rgba(59,130,246,.12)" stroke="rgba(59,130,246,.5)" stroke-width="1.5"/>
+          <rect width="200" height="24" y="6" fill="rgba(59,130,246,.12)"/>
+          <text x="100" y="20" fill="#93c5fd" font-weight="bold" text-anchor="middle" font-size="12" letter-spacing="1">EQUIPOS</text>
+          <line x1="0" y1="30" x2="200" y2="30" stroke="rgba(59,130,246,.3)" stroke-width="1"/>
+          <text x="12" y="48" fill="#ffcb6b" font-size="10">🔑 id</text>
+          <text x="105" y="48" fill="rgba(205,216,232,.4)">uuid (PK)</text>
+          <line x1="0" y1="55" x2="200" y2="55" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="72" fill="#cdd8e8">nombre</text>
+          <text x="105" y="72" fill="rgba(205,216,232,.4)">varchar(80)</text>
+          <line x1="0" y1="79" x2="200" y2="79" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="96" fill="#fca5a5">🔗 capitan_id</text>
+          <text x="115" y="96" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="103" x2="200" y2="103" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="120" fill="#cdd8e8">escudo_url</text>
+          <text x="105" y="120" fill="rgba(205,216,232,.4)">text</text>
+          <line x1="0" y1="127" x2="200" y2="127" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="144" fill="#cdd8e8">created_at</text>
+          <text x="105" y="144" fill="rgba(205,216,232,.4)">timestamptz</text>
+        </g>
+
+        <!-- ── TABLA: equipo_miembros ── -->
+        <g transform="translate(310, 240)">
+          <rect width="200" height="175" rx="6" fill="#111d2e" stroke="rgba(139,92,246,.5)" stroke-width="1.5"/>
+          <rect width="200" height="30" rx="6" fill="rgba(139,92,246,.12)" stroke="rgba(139,92,246,.5)" stroke-width="1.5"/>
+          <rect width="200" height="24" y="6" fill="rgba(139,92,246,.12)"/>
+          <text x="100" y="20" fill="#c4b5fd" font-weight="bold" text-anchor="middle" font-size="10" letter-spacing="1">EQUIPO_MIEMBROS</text>
+          <line x1="0" y1="30" x2="200" y2="30" stroke="rgba(139,92,246,.3)" stroke-width="1"/>
+          <text x="12" y="48" fill="#ffcb6b" font-size="10">🔑 id</text>
+          <text x="105" y="48" fill="rgba(205,216,232,.4)">uuid (PK)</text>
+          <line x1="0" y1="55" x2="200" y2="55" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="72" fill="#fca5a5">🔗 equipo_id</text>
+          <text x="105" y="72" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="79" x2="200" y2="79" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="96" fill="#fca5a5">🔗 usuario_id</text>
+          <text x="105" y="96" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="103" x2="200" y2="103" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="120" fill="#cdd8e8">estado</text>
+          <text x="105" y="120" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="127" x2="200" y2="127" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="144" fill="#cdd8e8">rol</text>
+          <text x="105" y="144" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="151" x2="200" y2="151" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="168" fill="#cdd8e8">joined_at</text>
+          <text x="105" y="168" fill="rgba(205,216,232,.4)">timestamptz</text>
+        </g>
+
+        <!-- ── TABLA: partidos ── -->
+        <g transform="translate(560, 30)">
+          <rect width="230" height="360" rx="6" fill="#111d2e" stroke="rgba(0,208,104,.5)" stroke-width="1.5"/>
+          <rect width="230" height="30" rx="6" fill="rgba(0,208,104,.1)" stroke="rgba(0,208,104,.5)" stroke-width="1.5"/>
+          <rect width="230" height="24" y="6" fill="rgba(0,208,104,.1)"/>
+          <text x="115" y="20" fill="#00d068" font-weight="bold" text-anchor="middle" font-size="12" letter-spacing="1">PARTIDOS</text>
+          <line x1="0" y1="30" x2="230" y2="30" stroke="rgba(0,208,104,.3)" stroke-width="1"/>
+          <text x="12" y="48" fill="#ffcb6b" font-size="10">🔑 id</text>
+          <text x="120" y="48" fill="rgba(205,216,232,.4)">uuid (PK)</text>
+          <line x1="0" y1="55" x2="230" y2="55" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="72" fill="#cdd8e8">titulo</text>
+          <text x="120" y="72" fill="rgba(205,216,232,.4)">varchar(100)</text>
+          <line x1="0" y1="79" x2="230" y2="79" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="96" fill="#cdd8e8">tipo_futbol</text>
+          <text x="120" y="96" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="103" x2="230" y2="103" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="120" fill="#cdd8e8">max_jugadores_equipo</text>
+          <text x="168" y="120" fill="rgba(205,216,232,.4)">smallint</text>
+          <line x1="0" y1="127" x2="230" y2="127" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="144" fill="#cdd8e8">fecha_hora</text>
+          <text x="120" y="144" fill="rgba(205,216,232,.4)">timestamptz</text>
+          <line x1="0" y1="151" x2="230" y2="151" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="168" fill="#fca5a5">🔗 lugar_id</text>
+          <text x="120" y="168" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="175" x2="230" y2="175" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="192" fill="#fca5a5">🔗 equipo_local_id</text>
+          <text x="150" y="192" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="199" x2="230" y2="199" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="216" fill="#fca5a5">🔗 equipo_visitante_id</text>
+          <text x="165" y="216" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="223" x2="230" y2="223" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="240" fill="#00d068">goles_local</text>
+          <text x="120" y="240" fill="rgba(205,216,232,.4)">smallint?</text>
+          <line x1="0" y1="247" x2="230" y2="247" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="264" fill="#00d068">goles_visitante</text>
+          <text x="140" y="264" fill="rgba(205,216,232,.4)">smallint?</text>
+          <line x1="0" y1="271" x2="230" y2="271" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="288" fill="#ffcb6b">result_conf_local</text>
+          <text x="148" y="288" fill="rgba(205,216,232,.4)">boolean</text>
+          <line x1="0" y1="295" x2="230" y2="295" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="312" fill="#ffcb6b">result_conf_visit</text>
+          <text x="148" y="312" fill="rgba(205,216,232,.4)">boolean</text>
+          <line x1="0" y1="319" x2="230" y2="319" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="336" fill="#cdd8e8">estado</text>
+          <text x="120" y="336" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="343" x2="230" y2="343" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="357" fill="#cdd8e8">created_at</text>
+          <text x="120" y="357" fill="rgba(205,216,232,.4)">timestamptz</text>
+        </g>
+
+        <!-- ── TABLA: partido_jugadores ── -->
+        <g transform="translate(560, 440)">
+          <rect width="230" height="220" rx="6" fill="#111d2e" stroke="rgba(239,68,68,.45)" stroke-width="1.5"/>
+          <rect width="230" height="30" rx="6" fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.45)" stroke-width="1.5"/>
+          <rect width="230" height="24" y="6" fill="rgba(239,68,68,.1)"/>
+          <text x="115" y="20" fill="#fca5a5" font-weight="bold" text-anchor="middle" font-size="10" letter-spacing="1">PARTIDO_JUGADORES</text>
+          <line x1="0" y1="30" x2="230" y2="30" stroke="rgba(239,68,68,.3)" stroke-width="1"/>
+          <text x="12" y="48" fill="#ffcb6b" font-size="10">🔑 id</text>
+          <text x="120" y="48" fill="rgba(205,216,232,.4)">uuid (PK)</text>
+          <line x1="0" y1="55" x2="230" y2="55" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="72" fill="#fca5a5">🔗 partido_id</text>
+          <text x="120" y="72" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="79" x2="230" y2="79" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="96" fill="#fca5a5">🔗 usuario_id</text>
+          <text x="120" y="96" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="103" x2="230" y2="103" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="120" fill="#fca5a5">🔗 equipo_id</text>
+          <text x="120" y="120" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="127" x2="230" y2="127" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="144" fill="#cdd8e8">tipo</text>
+          <text x="120" y="144" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="151" x2="230" y2="151" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="168" fill="#cdd8e8">estado_invitacion</text>
+          <text x="148" y="168" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="175" x2="230" y2="175" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="192" fill="#cdd8e8">asistio</text>
+          <text x="120" y="192" fill="rgba(205,216,232,.4)">boolean?</text>
+          <line x1="0" y1="199" x2="230" y2="199" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="216" fill="#cdd8e8">invited_at</text>
+          <text x="120" y="216" fill="rgba(205,216,232,.4)">timestamptz</text>
+        </g>
+
+        <!-- ── TABLA: notificaciones ── -->
+        <g transform="translate(830, 30)">
+          <rect width="175" height="220" rx="6" fill="#111d2e" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
+          <rect width="175" height="30" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
+          <rect width="175" height="24" y="6" fill="rgba(255,255,255,.06)"/>
+          <text x="87" y="20" fill="#cdd8e8" font-weight="bold" text-anchor="middle" font-size="10" letter-spacing="1">NOTIFICACIONES</text>
+          <line x1="0" y1="30" x2="175" y2="30" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+          <text x="12" y="48" fill="#ffcb6b" font-size="10">🔑 id</text>
+          <text x="88" y="48" fill="rgba(205,216,232,.4)">uuid (PK)</text>
+          <line x1="0" y1="55" x2="175" y2="55" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="72" fill="#fca5a5">🔗 usuario_id</text>
+          <text x="110" y="72" fill="rgba(205,216,232,.4)">uuid (FK)</text>
+          <line x1="0" y1="79" x2="175" y2="79" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="96" fill="#cdd8e8">tipo</text>
+          <text x="88" y="96" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="103" x2="175" y2="103" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="120" fill="#cdd8e8">ref_id</text>
+          <text x="88" y="120" fill="rgba(205,216,232,.4)">uuid</text>
+          <line x1="0" y1="127" x2="175" y2="127" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="144" fill="#cdd8e8">leida</text>
+          <text x="88" y="144" fill="rgba(205,216,232,.4)">boolean</text>
+          <line x1="0" y1="151" x2="175" y2="151" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="168" fill="#cdd8e8">payload</text>
+          <text x="88" y="168" fill="rgba(205,216,232,.4)">jsonb</text>
+          <line x1="0" y1="175" x2="175" y2="175" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="192" fill="#cdd8e8">created_at</text>
+          <text x="96" y="192" fill="rgba(205,216,232,.4)">timestamptz</text>
+        </g>
+
+        <!-- ── TABLA: lugares ── -->
+        <g transform="translate(830, 290)">
+          <rect width="220" height="290" rx="6" fill="#111d2e" stroke="rgba(251,146,60,.55)" stroke-width="1.5"/>
+          <rect width="220" height="30" rx="6" fill="rgba(251,146,60,.1)" stroke="rgba(251,146,60,.55)" stroke-width="1.5"/>
+          <rect width="220" height="24" y="6" fill="rgba(251,146,60,.1)"/>
+          <text x="110" y="20" fill="#fb923c" font-weight="bold" text-anchor="middle" font-size="12" letter-spacing="1">LUGARES</text>
+          <line x1="0" y1="30" x2="220" y2="30" stroke="rgba(251,146,60,.3)" stroke-width="1"/>
+          <text x="12" y="48" fill="#ffcb6b" font-size="10">🔑 id</text>
+          <text x="110" y="48" fill="rgba(205,216,232,.4)">uuid (PK)</text>
+          <line x1="0" y1="55" x2="220" y2="55" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="72" fill="#cdd8e8">nombre</text>
+          <text x="110" y="72" fill="rgba(205,216,232,.4)">varchar(100)</text>
+          <line x1="0" y1="79" x2="220" y2="79" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="96" fill="#cdd8e8">direccion</text>
+          <text x="110" y="96" fill="rgba(205,216,232,.4)">text</text>
+          <line x1="0" y1="103" x2="220" y2="103" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="120" fill="#cdd8e8">comuna</text>
+          <text x="110" y="120" fill="rgba(205,216,232,.4)">varchar(60)</text>
+          <line x1="0" y1="127" x2="220" y2="127" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="144" fill="#cdd8e8">tipo_superficie</text>
+          <text x="132" y="144" fill="rgba(205,216,232,.4)">enum</text>
+          <line x1="0" y1="151" x2="220" y2="151" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="168" fill="#cdd8e8">precio_hora</text>
+          <text x="110" y="168" fill="rgba(205,216,232,.4)">integer?</text>
+          <line x1="0" y1="175" x2="220" y2="175" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="192" fill="#cdd8e8">lat / lng</text>
+          <text x="110" y="192" fill="rgba(205,216,232,.4)">numeric</text>
+          <line x1="0" y1="199" x2="220" y2="199" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="216" fill="#cdd8e8">foto_url</text>
+          <text x="110" y="216" fill="rgba(205,216,232,.4)">text</text>
+          <line x1="0" y1="223" x2="220" y2="223" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="240" fill="#cdd8e8">contacto</text>
+          <text x="110" y="240" fill="rgba(205,216,232,.4)">varchar(80)</text>
+          <line x1="0" y1="247" x2="220" y2="247" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="264" fill="#fb923c">es_patrocinador</text>
+          <text x="142" y="264" fill="rgba(205,216,232,.4)">boolean</text>
+          <line x1="0" y1="271" x2="220" y2="271" stroke="rgba(255,255,255,.04)"/>
+          <text x="12" y="288" fill="#cdd8e8">created_at</text>
+          <text x="110" y="288" fill="rgba(205,216,232,.4)">timestamptz</text>
+        </g>
+
+        <!-- RELACIONES -->
+        <!-- usuarios → equipos (capitan) -->
+        <path d="M 230 120 Q 270 120 310 90" fill="none" stroke="rgba(240,192,64,.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="250" y="108" fill="rgba(240,192,64,.6)" font-size="9">capitan</text>
+
+        <!-- usuarios → equipo_miembros -->
+        <path d="M 230 200 Q 270 300 310 310" fill="none" stroke="rgba(139,92,246,.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="238" y="272" fill="rgba(139,92,246,.6)" font-size="9">1..N</text>
+
+        <!-- equipos → equipo_miembros -->
+        <line x1="410" y1="200" x2="410" y2="240" stroke="rgba(139,92,246,.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+        <!-- equipos → partidos (local) -->
+        <path d="M 510 100 Q 540 80 560 120" fill="none" stroke="rgba(0,208,104,.5)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="515" y="90" fill="rgba(0,208,104,.6)" font-size="9">local</text>
+
+        <!-- equipos → partidos (visitante) -->
+        <path d="M 510 140 Q 540 160 560 200" fill="none" stroke="rgba(0,208,104,.3)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="512" y="175" fill="rgba(0,208,104,.5)" font-size="9">visitante</text>
+
+        <!-- partidos → partido_jugadores -->
+        <line x1="675" y1="390" x2="675" y2="440" stroke="rgba(239,68,68,.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="680" y="420" fill="rgba(239,68,68,.6)" font-size="9">1..N</text>
+
+        <!-- usuarios → partido_jugadores -->
+        <path d="M 230 180 Q 400 590 560 550" fill="none" stroke="rgba(239,68,68,.3)" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+        <!-- usuarios → notificaciones -->
+        <path d="M 230 90 Q 600 20 830 80" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+        <!-- lugares → partidos -->
+        <path d="M 830 360 Q 810 280 790 200" fill="none" stroke="rgba(251,146,60,.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="802" y="275" fill="rgba(251,146,60,.6)" font-size="9">1..N</text>
+
+        <!-- usuarios → partidos capitan -->
+        <path d="M 230 70 Q 390 20 560 60" fill="none" stroke="rgba(240,192,64,.25)" stroke-width="1.5" stroke-dasharray="5 3"/>
+
+        <!-- LEYENDA -->
+        <rect x="30" y="720" width="760" height="58" rx="6" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+        <text x="48" y="740" fill="rgba(205,216,232,.5)" font-size="10">LEYENDA:</text>
+        <rect x="112" y="728" width="12" height="12" rx="2" fill="rgba(240,192,64,.3)" stroke="rgba(240,192,64,.6)" stroke-width="1"/>
+        <text x="130" y="740" fill="rgba(205,216,232,.6)" font-size="9">usuarios</text>
+        <rect x="192" y="728" width="12" height="12" rx="2" fill="rgba(59,130,246,.2)" stroke="rgba(93,130,246,.6)" stroke-width="1"/>
+        <text x="210" y="740" fill="rgba(205,216,232,.6)" font-size="9">equipos</text>
+        <rect x="265" y="728" width="12" height="12" rx="2" fill="rgba(139,92,246,.2)" stroke="rgba(139,92,246,.6)" stroke-width="1"/>
+        <text x="283" y="740" fill="rgba(205,216,232,.6)" font-size="9">miembros</text>
+        <rect x="346" y="728" width="12" height="12" rx="2" fill="rgba(0,208,104,.1)" stroke="rgba(0,208,104,.6)" stroke-width="1"/>
+        <text x="364" y="740" fill="rgba(205,216,232,.6)" font-size="9">partidos</text>
+        <rect x="416" y="728" width="12" height="12" rx="2" fill="rgba(239,68,68,.1)" stroke="rgba(239,68,68,.5)" stroke-width="1"/>
+        <text x="434" y="740" fill="rgba(205,216,232,.6)" font-size="9">partido_jugadores</text>
+        <rect x="543" y="728" width="12" height="12" rx="2" fill="rgba(251,146,60,.1)" stroke="rgba(251,146,60,.55)" stroke-width="1"/>
+        <text x="561" y="740" fill="rgba(205,216,232,.6)" font-size="9">lugares</text>
+        <text x="48" y="765" fill="#ffcb6b" font-size="9">🔑 PK</text>
+        <text x="82" y="765" fill="#fca5a5" font-size="9">🔗 FK</text>
+        <text x="118" y="765" fill="#00d068" font-size="9">verde = resultado confirmado</text>
+        <text x="310" y="765" fill="#fb923c" font-size="9">naranja = campo de monetizacion</text>
+        <line x1="500" y1="759" x2="532" y2="759" stroke="rgba(240,192,64,.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="540" y="765" fill="rgba(205,216,232,.5)" font-size="9">relacion FK</text>
+      </svg>
+    </div>
+
+    <div class="mt-3">
+      <h3>Indices y constraints clave</h3>
+      <div class="code-block mt-2">
+        <div class="code-header">
+          <span class="code-lang">SQL</span>
+          <span class="code-file">supabase/migrations/001_schema.sql</span>
+        </div>
+<pre><span class="cm">-- ENUMs</span>
+<span class="kw">CREATE TYPE</span> posicion_enum    <span class="kw">AS ENUM</span> (<span class="str">'portero'</span>, <span class="str">'defensa'</span>, <span class="str">'volante'</span>, <span class="str">'delantero'</span>);
+<span class="kw">CREATE TYPE</span> tipo_futbol_enum  <span class="kw">AS ENUM</span> (<span class="str">'futbol_11'</span>, <span class="str">'futbol_7'</span>, <span class="str">'futbol_5'</span>, <span class="str">'futsal'</span>);
+<span class="kw">CREATE TYPE</span> estado_partido    <span class="kw">AS ENUM</span> (<span class="str">'programado'</span>, <span class="str">'en_disputa'</span>, <span class="str">'completado'</span>, <span class="str">'cancelado'</span>);
+<span class="kw">CREATE TYPE</span> invitacion_enum   <span class="kw">AS ENUM</span> (<span class="str">'pendiente'</span>, <span class="str">'aceptado'</span>, <span class="str">'rechazado'</span>);
+<span class="kw">CREATE TYPE</span> superficie_enum   <span class="kw">AS ENUM</span> (<span class="str">'cesped_natural'</span>, <span class="str">'cesped_sintetico'</span>, <span class="str">'cemento'</span>, <span class="str">'parquet'</span>);
+
+<span class="cm">-- Tabla lugares (canchas)</span>
+<span class="kw">CREATE TABLE</span> lugares (
+  id               uuid        <span class="kw">PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span>(),
+  nombre           varchar(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+  direccion        text,
+  comuna           varchar(<span class="num">60</span>),
+  tipo_superficie  superficie_enum,
+  precio_hora      integer,
+  lat              numeric(<span class="num">9</span>,<span class="num">6</span>),
+  lng              numeric(<span class="num">9</span>,<span class="num">6</span>),
+  foto_url         text,
+  contacto         varchar(<span class="num">80</span>),
+  es_patrocinador  boolean      <span class="kw">NOT NULL DEFAULT</span> <span class="kw">false</span>,
+  created_at       timestamptz  <span class="kw">NOT NULL DEFAULT</span> <span class="fn">now</span>()
+);
+
+<span class="cm">-- Tabla partidos (actualizada)</span>
+<span class="kw">CREATE TABLE</span> partidos (
+  id                   uuid        <span class="kw">PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span>(),
+  titulo               varchar(<span class="num">100</span>),
+  tipo_futbol          tipo_futbol_enum <span class="kw">NOT NULL</span>,
+  max_jugadores_equipo smallint    <span class="kw">NOT NULL</span>,
+  fecha_hora           timestamptz <span class="kw">NOT NULL</span>,
+  lugar_id             uuid        <span class="kw">REFERENCES</span> lugares(id),
+  equipo_local_id      uuid        <span class="kw">NOT NULL REFERENCES</span> equipos(id),
+  equipo_visitante_id  uuid        <span class="kw">NOT NULL REFERENCES</span> equipos(id),
+  goles_local          smallint,   <span class="cm">-- NULL hasta cerrar el partido</span>
+  goles_visitante      smallint,
+  result_conf_local    boolean     <span class="kw">NOT NULL DEFAULT</span> <span class="kw">false</span>,
+  result_conf_visit    boolean     <span class="kw">NOT NULL DEFAULT</span> <span class="kw">false</span>,
+  estado               estado_partido <span class="kw">NOT NULL DEFAULT</span> <span class="str">'programado'</span>,
+  created_at           timestamptz <span class="kw">NOT NULL DEFAULT</span> <span class="fn">now</span>(),
+  <span class="kw">CONSTRAINT</span> equipos_distintos <span class="kw">CHECK</span> (equipo_local_id != equipo_visitante_id)
+);
+
+<span class="cm">-- partido_jugadores ahora lleva equipo_id</span>
+<span class="kw">ALTER TABLE</span> partido_jugadores
+  <span class="kw">ADD COLUMN</span> equipo_id uuid <span class="kw">NOT NULL REFERENCES</span> equipos(id);
+
+<span class="cm">-- Estado pasa a completado solo cuando AMBOS capitanes confirman</span>
+<span class="kw">CREATE OR REPLACE FUNCTION</span> <span class="fn">check_resultado_confirmado</span>()
+<span class="kw">RETURNS TRIGGER AS</span> $$
+<span class="kw">BEGIN</span>
+  <span class="kw">IF NEW</span>.result_conf_local <span class="kw">AND NEW</span>.result_conf_visit <span class="kw">THEN</span>
+    <span class="kw">NEW</span>.estado := <span class="str">'completado'</span>;
+  <span class="kw">END IF</span>;
+  <span class="kw">RETURN NEW</span>;
+<span class="kw">END</span>;
+$$ <span class="kw">LANGUAGE</span> plpgsql;
+
+<span class="kw">CREATE TRIGGER</span> trg_resultado_confirmado
+  <span class="kw">BEFORE UPDATE ON</span> partidos
+  <span class="kw">FOR EACH ROW EXECUTE FUNCTION</span> <span class="fn">check_resultado_confirmado</span>();
+
+<span class="cm">-- Indices clave</span>
+<span class="kw">CREATE INDEX</span> idx_usuarios_comuna_posicion   <span class="kw">ON</span> usuarios (comuna, posicion);
+<span class="kw">CREATE INDEX</span> idx_partidos_fecha             <span class="kw">ON</span> partidos (fecha_hora);
+<span class="kw">CREATE INDEX</span> idx_partidos_equipos           <span class="kw">ON</span> partidos (equipo_local_id, equipo_visitante_id);
+<span class="kw">CREATE INDEX</span> idx_partido_jugadores_partido  <span class="kw">ON</span> partido_jugadores (partido_id);
+<span class="kw">CREATE INDEX</span> idx_notif_usuario_leida        <span class="kw">ON</span> notificaciones (usuario_id, leida);
+<span class="kw">CREATE INDEX</span> idx_lugares_comuna             <span class="kw">ON</span> lugares (comuna);
+<span class="kw">CREATE INDEX</span> idx_lugares_patrocinador       <span class="kw">ON</span> lugares (es_patrocinador) <span class="kw">WHERE</span> es_patrocinador = <span class="kw">true</span>;
+
+<span class="cm">-- Funcion que recalcula reputacion tras registrar asistencia</span>
+<span class="kw">CREATE OR REPLACE FUNCTION</span> <span class="fn">recalcular_reputacion</span>(p_usuario_id uuid)
+<span class="kw">RETURNS void AS</span> $$
+  <span class="kw">UPDATE</span> usuarios <span class="kw">SET</span>
+    rep_asistencia = (
+      <span class="kw">SELECT ROUND</span>(<span class="fn">AVG</span>(asistio::int) * <span class="num">100</span>, <span class="num">1</span>)
+      <span class="kw">FROM</span>  partido_jugadores
+      <span class="kw">WHERE</span> usuario_id = p_usuario_id <span class="kw">AND</span> asistio <span class="kw">IS NOT NULL</span>
+    )
+  <span class="kw">WHERE</span> id = p_usuario_id;
+$$ <span class="kw">LANGUAGE</span> sql;</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4b. LUGARES ─────────────────────────────────────── -->
+  <section class="doc-section section-anchor" id="lugares">
+    <div class="section-header">
+      <div class="section-tag">04b · Tabla Lugares</div>
+      <h2>Canchas como activo de la plataforma</h2>
+      <p>La tabla <code style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:.82em">lugares</code> cumple dos roles: referencia de datos para los partidos y canal de monetizacion mediante canchas patrocinadoras que pagan por visibilidad.</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="table-wrap">
+          <table class="doc-table">
+            <thead><tr><th>Campo</th><th>Tipo</th><th>Descripcion</th></tr></thead>
+            <tbody>
+              <tr><td>id</td><td>uuid PK</td><td>Identificador unico</td></tr>
+              <tr><td>nombre</td><td>varchar(100)</td><td>Nombre del recinto o cancha</td></tr>
+              <tr><td>direccion</td><td>text</td><td>Direccion completa</td></tr>
+              <tr><td>comuna</td><td>varchar(60)</td><td>Usado para filtrar por zona</td></tr>
+              <tr><td>tipo_superficie</td><td>enum</td><td>cesped_natural / sintetico / cemento / parquet</td></tr>
+              <tr><td>precio_hora</td><td>integer (CLP)</td><td>Referencial, nullable</td></tr>
+              <tr><td>lat / lng</td><td>numeric(9,6)</td><td>Coordenadas para mapa futuro</td></tr>
+              <tr><td>foto_url</td><td>text</td><td>Imagen almacenada en Supabase Storage</td></tr>
+              <tr><td>contacto</td><td>varchar(80)</td><td>Telefono o email del recinto</td></tr>
+              <tr><td style="color:var(--gold)">es_patrocinador</td><td>boolean</td><td>Marca que activa visibilidad premium en la app</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-gold mt-3">
+          <div class="callout-title">Campo es_patrocinador</div>
+          Cuando es <code style="font-family:'JetBrains Mono',monospace">true</code>, el lugar aparece destacado en el selector al crear un partido y en una futura seccion de canchas recomendadas. Este flag es la base del modelo B2B de monetizacion con recintos deportivos.
+        </div>
+      </div>
+
+      <div>
+        <h3>Modelo de negocio B2B con canchas</h3>
+        <div class="rules-list mt-2">
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Registro gratuito de canchas</div>
+              <div class="rule-desc">Cualquier recinto puede solicitar aparecer en el directorio de lugares. Aparece en el listado estandar sin costo.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Plan Cancha Patrocinadora</div>
+              <div class="rule-desc">Por una tarifa mensual, el recinto activa <code style="color:var(--gold);font-size:.85em">es_patrocinador = true</code> y obtiene: posicion destacada en el selector, foto banner, boton de contacto directo y estadisticas de cuantos partidos se jugaron ahi.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Datos anonimizados para el recinto</div>
+              <div class="rule-desc">El recinto puede ver cuantos partidos se programaron en sus instalaciones (sin datos personales de los jugadores). Esto les da valor para renovar el patrocinio.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Expansion: reserva en linea (v2)</div>
+              <div class="rule-desc">A futuro, el recinto puede habilitar disponibilidad horaria y los capitanes reservan la cancha directamente desde la app al crear el partido. Comision del 3-5%.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-green mt-3">
+          <div class="callout-title">Propuesta de precio Cancha Patrocinadora</div>
+          $19.990 CLP/mes por recinto. Estimado 10 canchas patrocinadas en Santiago al mes 6 = <strong>~$200.000 CLP/mes</strong> adicionales al MRR de usuarios.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. RLS ────────────────────────────────────────── -->
+  <section class="doc-section section-anchor" id="rls">
+    <div class="section-header">
+      <div class="section-tag">05 · Row Level Security</div>
+      <h2>Politicas de seguridad</h2>
+      <p>RLS es la capa de autorizacion principal. Cada tabla tiene politicas que se evaluan en PostgreSQL antes de retornar datos al cliente Angular.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table class="doc-table">
+        <thead>
+          <tr><th>Tabla</th><th>Operacion</th><th>Politica</th><th>Descripcion</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>usuarios</td>
+            <td><span class="badge badge-blue">SELECT</span></td>
+            <td><code style="font-family:'JetBrains Mono',monospace;font-size:.78em;color:var(--green)">auth.uid() = id</code></td>
+            <td>Cada usuario lee solo su propio perfil. Para ver otro jugador existe una funcion RPC publica.</td>
+          </tr>
+          <tr>
+            <td>usuarios</td>
+            <td><span class="badge badge-gold">UPDATE</span></td>
+            <td><code style="font-family:'JetBrains Mono',monospace;font-size:.78em;color:var(--green)">auth.uid() = id</code></td>
+            <td>Solo el propio usuario puede editar su perfil.</td>
+          </tr>
+          <tr>
+            <td>equipos</td>
+            <td><span class="badge badge-blue">SELECT</span></td>
+            <td>Es miembro activo del equipo</td>
+            <td>Solo miembros ven el equipo.</td>
+          </tr>
+          <tr>
+            <td>equipos</td>
+            <td><span class="badge badge-green">INSERT</span></td>
+            <td>Usuario autenticado</td>
+            <td>Cualquier usuario logueado puede crear un equipo.</td>
+          </tr>
+          <tr>
+            <td>equipos</td>
+            <td><span class="badge badge-gold">UPDATE / DELETE</span></td>
+            <td><code style="font-family:'JetBrains Mono',monospace;font-size:.78em;color:var(--green)">capitan_id = auth.uid()</code></td>
+            <td>Solo el capitan puede modificar o eliminar el equipo.</td>
+          </tr>
+          <tr>
+            <td>partidos</td>
+            <td><span class="badge badge-blue">SELECT</span></td>
+            <td>Es convocado o capitan</td>
+            <td>Solo jugadores invitados o el capitan ven el partido.</td>
+          </tr>
+          <tr>
+            <td>partidos</td>
+            <td><span class="badge badge-green">INSERT</span></td>
+            <td>Usuario es capitan de ambos equipos o de uno con invitacion al otro</td>
+            <td>El partido debe referenciar dos equipos distintos.</td>
+          </tr>
+          <tr>
+            <td>partidos</td>
+            <td><span class="badge badge-gold">UPDATE resultado</span></td>
+            <td>Es capitan del equipo local o visitante segun el campo a confirmar</td>
+            <td>Cada capitan solo puede confirmar el resultado de su equipo (<code style="font-family:'JetBrains Mono',monospace;font-size:.78em;color:var(--green)">result_conf_local</code> o <code style="font-family:'JetBrains Mono',monospace;font-size:.78em;color:var(--green)">result_conf_visit</code>).</td>
+          </tr>
+          <tr>
+            <td>partido_jugadores</td>
+            <td><span class="badge badge-gold">UPDATE asistio</span></td>
+            <td>Capitan del equipo del jugador en ese partido</td>
+            <td>Cada capitan registra asistencia solo de los jugadores de su equipo.</td>
+          </tr>
+          <tr>
+            <td>notificaciones</td>
+            <td><span class="badge badge-blue">SELECT / UPDATE</span></td>
+            <td><code style="font-family:'JetBrains Mono',monospace;font-size:.78em;color:var(--green)">usuario_id = auth.uid()</code></td>
+            <td>Cada usuario solo ve y marca sus propias notificaciones.</td>
+          </tr>
+          <tr>
+            <td>lugares</td>
+            <td><span class="badge badge-blue">SELECT</span></td>
+            <td>Publica (cualquier usuario autenticado)</td>
+            <td>Cualquier usuario puede ver el directorio de canchas al crear un partido.</td>
+          </tr>
+          <tr>
+            <td>lugares</td>
+            <td><span class="badge badge-green">INSERT / UPDATE</span></td>
+            <td>Solo via service role (admin)</td>
+            <td>Los recintos no se auto-registran en el MVP; lo hace un admin via Supabase Studio o panel interno.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── 6. AUTH ───────────────────────────────────────── -->
+  <section class="doc-section section-anchor" id="auth">
+    <div class="section-header">
+      <div class="section-tag">06 · Autenticacion</div>
+      <h2>Auth con Angular + Supabase</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">TypeScript</span>
+        <span class="code-file">auth.service.ts</span>
+      </div>
+<pre><span class="kw">import</span> { <span class="tp">Injectable</span>, <span class="fn">inject</span>, <span class="fn">signal</span>, <span class="fn">computed</span> } <span class="kw">from</span> <span class="str">'@angular/core'</span>;
+<span class="kw">import</span> { <span class="tp">SupabaseClient</span>, <span class="tp">Session</span> } <span class="kw">from</span> <span class="str">'@supabase/supabase-js'</span>;
+
+<span class="tp">@Injectable</span>({ providedIn: <span class="str">'root'</span> })
+<span class="kw">export class</span> <span class="tp">AuthService</span> {
+  <span class="kw">private</span> supabase = <span class="fn">inject</span>(<span class="tp">SUPABASE_CLIENT</span>);
+
+  <span class="cm">// Estado reactivo con Signals</span>
+  <span class="kw">readonly</span> session = <span class="fn">signal</span>&lt;<span class="tp">Session</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+  <span class="kw">readonly</span> isLoggedIn = <span class="fn">computed</span>(() => <span class="kw">this</span>.session() !== <span class="kw">null</span>);
+  <span class="kw">readonly</span> userId    = <span class="fn">computed</span>(() => <span class="kw">this</span>.session()?.user.id);
+
+  <span class="kw">constructor</span>() {
+    <span class="cm">// Inicializar desde sesion activa</span>
+    <span class="kw">this</span>.supabase.auth.<span class="fn">getSession</span>().<span class="fn">then</span>(({ data }) =>
+      <span class="kw">this</span>.session.<span class="fn">set</span>(data.session)
+    );
+    <span class="cm">// Escuchar cambios de sesion</span>
+    <span class="kw">this</span>.supabase.auth.<span class="fn">onAuthStateChange</span>((_, s) =>
+      <span class="kw">this</span>.session.<span class="fn">set</span>(s)
+    );
+  }
+
+  <span class="fn">loginWithGoogle</span>() {
+    <span class="kw">return this</span>.supabase.auth.<span class="fn">signInWithOAuth</span>({
+      provider: <span class="str">'google'</span>,
+      options: { redirectTo: <span class="str">`${location.origin}/app/dashboard`</span> }
+    });
+  }
+
+  <span class="fn">logout</span>() { <span class="kw">return this</span>.supabase.auth.<span class="fn">signOut</span>(); }
+}
+
+<span class="cm">// Guard funcional Angular 20</span>
+<span class="kw">export const</span> <span class="fn">authGuard</span>: <span class="tp">CanActivateFn</span> = () => {
+  <span class="kw">const</span> auth   = <span class="fn">inject</span>(<span class="tp">AuthService</span>);
+  <span class="kw">const</span> router = <span class="fn">inject</span>(<span class="tp">Router</span>);
+  <span class="kw">return</span> auth.isLoggedIn() || router.<span class="fn">createUrlTree</span>([<span class="str">'/auth'</span>]);
+};</pre>
+    </div>
+  </section>
+
+  <!-- ── 7. REALTIME ──────────────────────────────────── -->
+  <section class="doc-section section-anchor" id="realtime">
+    <div class="section-header">
+      <div class="section-tag">07 · Realtime</div>
+      <h2>Notificaciones en vivo</h2>
+      <p>Supabase Realtime usa Change Data Capture sobre PostgreSQL. Angular se suscribe via WebSocket y actualiza Signals sin polling.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">TypeScript</span>
+        <span class="code-file">notificaciones.service.ts</span>
+      </div>
+<pre><span class="kw">export class</span> <span class="tp">NotificacionesService</span> {
+  <span class="kw">private</span> supabase = <span class="fn">inject</span>(<span class="tp">SUPABASE_CLIENT</span>);
+  <span class="kw">private</span> auth     = <span class="fn">inject</span>(<span class="tp">AuthService</span>);
+
+  <span class="kw">readonly</span> notifs = <span class="fn">signal</span>&lt;<span class="tp">Notificacion</span>[]&gt;([]);
+  <span class="kw">readonly</span> unread = <span class="fn">computed</span>(() => <span class="kw">this</span>.notifs().<span class="fn">filter</span>(n => !n.leida).length);
+
+  <span class="fn">subscribeToRealtime</span>() {
+    <span class="kw">this</span>.supabase
+      .<span class="fn">channel</span>(<span class="str">`notifs-${this.auth.userId()}`</span>)
+      .<span class="fn">on</span>(<span class="str">'postgres_changes'</span>, {
+        event:  <span class="str">'INSERT'</span>,
+        schema: <span class="str">'public'</span>,
+        table:  <span class="str">'notificaciones'</span>,
+        filter: <span class="str">`usuario_id=eq.${this.auth.userId()}`</span>
+      }, (payload) => {
+        <span class="kw">this</span>.notifs.<span class="fn">update</span>(n => [payload.new <span class="kw">as</span> <span class="tp">Notificacion</span>, ...n]);
+      })
+      .<span class="fn">subscribe</span>();
+  }
+}</pre>
+    </div>
+  </section>
+
+  <!-- ── 8. REGLAS DE NEGOCIO ─────────────────────────── -->
+  <section class="doc-section section-anchor" id="reglas">
+    <div class="section-header">
+      <div class="section-tag">08 · Reglas de negocio</div>
+      <h2>Logica central de la aplicacion</h2>
+      <p>Implementadas como combinacion de RLS policies, funciones PostgreSQL y validaciones en el servicio Angular segun complejidad.</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3 style="margin-bottom:.8rem">Equipos y membresia</h3>
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">01</div>
+            <div class="rule-content">
+              <div class="rule-title">Capitan unico por equipo</div>
+              <div class="rule-desc">El creador del equipo es automaticamente su capitan. Solo puede existir un capitan activo. Transferencia de capitan es posible pero manual.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">02</div>
+            <div class="rule-content">
+              <div class="rule-title">Pertenencia multiple</div>
+              <div class="rule-desc">Un usuario puede ser miembro de multiples equipos sin restriccion. El constraint UNIQUE aplica sobre (equipo_id, usuario_id).</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">03</div>
+            <div class="rule-content">
+              <div class="rule-title">Invitacion obligatoria</div>
+              <div class="rule-desc">No existe union libre a un equipo. Siempre requiere invitacion del capitan. El estado inicial es <code style="color:var(--gold);font-size:.85em">pendiente</code>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:.8rem">Partidos</h3>
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">04</div>
+            <div class="rule-content">
+              <div class="rule-title">Obligatorio: 2 equipos distintos</div>
+              <div class="rule-desc">Todo partido requiere <code style="color:var(--gold);font-size:.85em">equipo_local_id</code> y <code style="color:var(--gold);font-size:.85em">equipo_visitante_id</code> NOT NULL y distintos. Garantizado por CHECK constraint en la DB.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">05</div>
+            <div class="rule-content">
+              <div class="rule-title">Tipo de futbol y cupo maximo</div>
+              <div class="rule-desc"><code style="color:var(--gold);font-size:.85em">tipo_futbol</code> (futbol_11 / futbol_7 / futbol_5 / futsal) y <code style="color:var(--gold);font-size:.85em">max_jugadores_equipo</code> son campos requeridos al crear el partido. La app valida que no se convoquen mas jugadores que el cupo por equipo.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">06</div>
+            <div class="rule-content">
+              <div class="rule-title">Solo el capitan convoca</div>
+              <div class="rule-desc">Ningun miembro puede crear partidos sin ser capitan del equipo. Cada capitan gestiona la convocatoria de su propio equipo.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col mt-4">
+      <div>
+        <h3 style="margin-bottom:.8rem">Resultado del partido</h3>
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">07</div>
+            <div class="rule-content">
+              <div class="rule-title">Confirmacion bilateral obligatoria</div>
+              <div class="rule-desc">Cada capitan ingresa los goles de su equipo y confirma el resultado (<code style="color:var(--gold);font-size:.85em">result_conf_local</code> / <code style="color:var(--gold);font-size:.85em">result_conf_visit</code>). El partido pasa a <code style="color:var(--green);font-size:.85em">completado</code> solo cuando AMBOS confirman, via trigger PostgreSQL.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">08</div>
+            <div class="rule-content">
+              <div class="rule-title">Resultado en disputa</div>
+              <div class="rule-desc">Si ambos capitanes confirman pero los marcadores no coinciden, el partido queda en estado <code style="color:var(--gold);font-size:.85em">en_disputa</code> y se notifica a ambos para corregir. La reputacion no se actualiza hasta resolver.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">09</div>
+            <div class="rule-content">
+              <div class="rule-title">Ventana de confirmacion</div>
+              <div class="rule-desc">Los capitanes tienen 24 horas despues de la fecha del partido para confirmar el resultado. Pasado ese plazo, un Edge Function cancela automaticamente la confirmacion pendiente y envia recordatorio.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:.8rem">Lugares y canchas</h3>
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">10</div>
+            <div class="rule-content">
+              <div class="rule-title">Lugar referenciado, no texto libre</div>
+              <div class="rule-desc">Al crear un partido, el lugar se selecciona del catalogo de la tabla <code style="color:var(--gold);font-size:.85em">lugares</code> via FK. Si no existe la cancha, el capitan puede sugerirla (flujo separado de alta manual por admin).</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">11</div>
+            <div class="rule-content">
+              <div class="rule-title">Visibilidad de canchas patrocinadoras</div>
+              <div class="rule-desc">En el selector de lugar, las canchas con <code style="color:var(--gold);font-size:.85em">es_patrocinador = true</code> aparecen primero con un badge destacado. El orden es: patrocinadores por comuna → resto por comuna → otras comunas.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col mt-4">
+      <div>
+        <h3 style="margin-bottom:.8rem">Reputacion</h3>
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">14</div>
+            <div class="rule-content">
+              <div class="rule-title">Calculo post-partido</div>
+              <div class="rule-desc">La reputacion se recalcula via funcion PostgreSQL una vez que el partido esta <code style="color:var(--green);font-size:.85em">completado</code> (ambos capitanes confirmaron). Es un promedio historico ponderado.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">15</div>
+            <div class="rule-content">
+              <div class="rule-title">Visibilidad controlada</div>
+              <div class="rule-desc">El puntaje de reputacion es visible publicamente en la busqueda de reemplazos. El historial detallado es privado.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:.8rem">Busqueda de reemplazos</h3>
+        <div class="rules-list">
+          <div class="rule-item">
+            <div class="rule-num">12</div>
+            <div class="rule-content">
+              <div class="rule-title">Filtro por posicion y comuna</div>
+              <div class="rule-desc">La query de candidatos filtra por: misma posicion que el jugador baja, misma comuna, no convocado ya al partido, ordenado por reputacion desc.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">13</div>
+            <div class="rule-content">
+              <div class="rule-title">Limite de invitaciones</div>
+              <div class="rule-desc">Se pueden enviar hasta 5 invitaciones simultaneas por cupo vacante para no saturar a los jugadores libres.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 9. MONETIZACION ──────────────────────────────── -->
+  <section class="doc-section section-anchor" id="monetizacion">
+    <div class="section-header">
+      <div class="section-tag">09 · Monetizacion</div>
+      <h2>Modelo freemium</h2>
+      <p>El MVP arranca 100% gratis para maximizar adopcion. Los planes de pago se habilitan a partir del mes 4-6, cuando exista base de usuarios suficiente para justificar el valor.</p>
+    </div>
+
+    <div class="callout callout-gold">
+      <div class="callout-title">Principio freemium</div>
+      El plan gratuito debe ser suficientemente util para que los usuarios adopten la app. Los planes de pago desbloquean capacidades de organizacion avanzada, no limitan las funciones core de jugar.
+    </div>
+
+    <div class="callout callout-green mt-3">
+      <div class="callout-title">Canal B2B: Canchas patrocinadoras</div>
+      Ademas del modelo B2C (jugadores), existe un canal B2B independiente: recintos deportivos pagan por aparecer destacados en el directorio de lugares. Ver detalle en la seccion <strong>Tabla Lugares</strong>. Este canal no requiere masa critica de usuarios de pago — basta con actividad en la app.
+    </div>
+
+    <div class="plans-grid">
+      <!-- FREE -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <div class="plan-name free">Gratis</div>
+          <div class="plan-price"><span class="currency">$</span>0<span class="period">/mes</span></div>
+          <div class="plan-target">Para jugadores casuales</div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feature"><span class="check check-yes">✓</span> 1 equipo como capitan</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Hasta 5 partidos/mes</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Perfil publico + reputacion</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Recibir invitaciones</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Busqueda de reemplazos (3/mes)</div>
+          <div class="plan-feature disabled"><span class="check check-no">✕</span> Historial estadisticas</div>
+          <div class="plan-feature disabled"><span class="check check-no">✕</span> Equipos ilimitados</div>
+          <div class="plan-feature disabled"><span class="check check-no">✕</span> Notificaciones push</div>
+        </div>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan-card featured">
+        <div class="plan-header">
+          <div class="plan-name pro">Jugador Pro</div>
+          <div class="plan-price"><span class="currency">$</span>2.990<span class="period">/mes</span></div>
+          <div class="plan-target">Para jugadores recurrentes</div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feature"><span class="check check-yes">✓</span> Todo lo del plan gratis</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Equipos ilimitados</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Partidos ilimitados</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Busqueda de reemplazos ilimitada</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Badge verificado en perfil</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Historial completo de partidos</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Notificaciones push (PWA)</div>
+          <div class="plan-feature disabled"><span class="check check-no">✕</span> Estadisticas de equipo</div>
+        </div>
+      </div>
+
+      <!-- CLUB -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <div class="plan-name club">Club</div>
+          <div class="plan-price"><span class="currency">$</span>7.990<span class="period">/mes</span></div>
+          <div class="plan-target">Para organizadores serios</div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feature"><span class="check check-yes">✓</span> Todo lo de Jugador Pro</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Hasta 3 equipos gestionados</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Estadisticas de equipo</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Exportar plantilla (PDF/CSV)</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Fijar cancha habitual</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Prioridad en busqueda de reemplazos</div>
+          <div class="plan-feature disabled"><span class="check check-no">✕</span> Multi-equipo sin limite</div>
+        </div>
+      </div>
+
+      <!-- LIGA -->
+      <div class="plan-card">
+        <div class="plan-header">
+          <div class="plan-name league">Liga</div>
+          <div class="plan-price"><span class="currency">$</span>19.990<span class="period">/mes</span></div>
+          <div class="plan-target">Para ligas y torneos locales</div>
+        </div>
+        <div class="plan-features">
+          <div class="plan-feature"><span class="check check-yes">✓</span> Todo lo de Club</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Equipos ilimitados bajo una liga</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Tabla de posiciones automatica</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Gestion de resultados y marcadores</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> URL publica de la liga</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> Soporte prioritario</div>
+          <div class="plan-feature"><span class="check check-yes">✓</span> API acceso (futuro)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <h3>Proyeccion de ingresos (escenario conservador)</h3>
+      <div class="table-wrap mt-2">
+        <table class="doc-table">
+          <thead>
+            <tr><th>Mes</th><th>Usuarios reg.</th><th>Pro (3%)</th><th>Club (1%)</th><th>Canchas B2B</th><th>MRR estimado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1-3</td><td>200</td><td>—</td><td>—</td><td>—</td><td>$0 (MVP)</td></tr>
+            <tr><td>4</td><td>500</td><td>15</td><td>5</td><td>3 canchas</td><td>~$145.000</td></tr>
+            <tr><td>6</td><td>1.200</td><td>36</td><td>12</td><td>10 canchas</td><td>~$604.000</td></tr>
+            <tr><td>12</td><td>4.000</td><td>120</td><td>40</td><td>30 canchas</td><td>~$1.277.000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-2" style="font-size:.78rem">* Precios en CLP. B2C: conversion se activa cuando el NPS supere 40. B2B canchas: $19.990/mes por recinto patrocinador.</p>
+    </div>
+  </section>
+
+  <!-- ── 10. ESCALAMIENTO ──────────────────────────────── -->
+  <section class="doc-section section-anchor" id="escalamiento">
+    <div class="section-header">
+      <div class="section-tag">10 · Plan de escalamiento</div>
+      <h2>De MVP a escala nacional</h2>
+      <p>El stack BaaS permite crecer sin cambiar arquitectura hasta ~50.000 usuarios activos. A partir de ahi se introducen capas adicionales de forma incremental.</p>
+    </div>
+
+    <div class="scale-grid">
+      <div class="scale-card">
+        <div class="scale-icon">🏎️</div>
+        <div class="scale-title">0 → 1.000 usuarios</div>
+        <div class="scale-desc">Free tier de Supabase cubre todo. Vercel Hobby para el frontend. Sin costo operacional.</div>
+        <span class="scale-metric">$0 / mes</span>
+      </div>
+      <div class="scale-card">
+        <div class="scale-icon">📦</div>
+        <div class="scale-title">1.000 → 10.000</div>
+        <div class="scale-desc">Upgrade a Supabase Pro ($25/mes). Connection pooling con PgBouncer activado. Indices optimizados.</div>
+        <span class="scale-metric">~$50 / mes</span>
+      </div>
+      <div class="scale-card">
+        <div class="scale-icon">🚀</div>
+        <div class="scale-title">10.000 → 50.000</div>
+        <div class="scale-desc">Supabase Team plan. Read replicas para queries de busqueda. Edge Functions para logica pesada de reputacion.</div>
+        <span class="scale-metric">~$200 / mes</span>
+      </div>
+      <div class="scale-card">
+        <div class="scale-icon">🌎</div>
+        <div class="scale-title">50.000+ usuarios</div>
+        <div class="scale-desc">Evaluar NestJS API propia + Supabase como DB. Cache Redis para busqueda de reemplazos. Expansion a otros paises.</div>
+        <span class="scale-metric">> $500 / mes</span>
+      </div>
+    </div>
+
+    <div class="two-col mt-4">
+      <div>
+        <h3>Estrategia de base de datos</h3>
+        <div class="rules-list mt-2">
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Connection pooling desde dia 1</div>
+              <div class="rule-desc">Configurar el cliente Angular con el endpoint de PgBouncer de Supabase (puerto 6543) para no agotar conexiones.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Particion por fecha en partidos</div>
+              <div class="rule-desc">Cuando la tabla partidos supere 1M de filas, particionar por ano/mes para mantener queries rapidas.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Full-text search con pg_trgm</div>
+              <div class="rule-desc">Para busqueda de jugadores por nombre, activar pg_trgm y crear indice GIN en la columna nombre.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3>Estrategia de frontend</h3>
+        <div class="rules-list mt-2">
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Lazy loading agresivo</div>
+              <div class="rule-desc">Cada modulo Angular se carga solo cuando el usuario navega a esa ruta. El bundle inicial debe ser menor a 150kb.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">SSR con Angular Universal (v2)</div>
+              <div class="rule-desc">Activar SSR en Vercel para mejorar SEO de las paginas publicas (landing, perfiles publicos de jugadores).</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">PWA para movil</div>
+              <div class="rule-desc">Service Worker + Web Push Notifications para comportamiento nativo sin app store. Instalar en pantalla de inicio.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 11. ROADMAP ───────────────────────────────────── -->
+  <section class="doc-section section-anchor" id="roadmap">
+    <div class="section-header">
+      <div class="section-tag">11 · Roadmap</div>
+      <h2>Plan de implementacion</h2>
+      <p>8 semanas de desarrollo para un MVP funcional en produccion. Cada sprint entrega valor incremental.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-phase">Semana 1-2</div>
+          <div class="tl-title">Fundacion</div>
+          <div class="tl-desc">Setup Angular 20 + Supabase local. Schema DB + migraciones. Auth Google funcional. Componentes base (layout, nav).</div>
+          <div class="tl-tags">
+            <span class="badge badge-blue">Angular</span>
+            <span class="badge badge-green">Supabase CLI</span>
+            <span class="badge badge-purple">Auth</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-phase">Semana 3</div>
+          <div class="tl-title">Perfil y equipos</div>
+          <div class="tl-desc">CRUD de perfil de jugador. Crear equipo. Invitar miembros. Vista del equipo. RLS policies de equipos.</div>
+          <div class="tl-tags">
+            <span class="badge badge-gold">Core feature</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot green"></div>
+          <div class="tl-phase green">Semana 4-5</div>
+          <div class="tl-title">Partidos</div>
+          <div class="tl-desc">Crear partido. Convocatoria al equipo. Confirmar / rechazar asistencia. Vista detalle de partido. Cerrar partido y registrar asistencia.</div>
+          <div class="tl-tags">
+            <span class="badge badge-gold">Core feature</span>
+            <span class="badge badge-green">Realtime</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot green"></div>
+          <div class="tl-phase green">Semana 6</div>
+          <div class="tl-title">Reemplazos y reputacion</div>
+          <div class="tl-desc">Busqueda de candidatos por posicion y comuna. Envio de invitaciones. Calculo de reputacion via funcion PostgreSQL. Notificaciones realtime.</div>
+          <div class="tl-tags">
+            <span class="badge badge-gold">Diferenciador</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot blue"></div>
+          <div class="tl-phase blue">Semana 7</div>
+          <div class="tl-title">Pulido y testing</div>
+          <div class="tl-desc">Tests unitarios y E2E. Fix de bugs. Optimizacion de queries. Mejoras UX. PWA manifest. Lighthouse > 90.</div>
+          <div class="tl-tags">
+            <span class="badge badge-blue">Vitest</span>
+            <span class="badge badge-blue">Playwright</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot blue"></div>
+          <div class="tl-phase blue">Semana 8</div>
+          <div class="tl-title">Launch</div>
+          <div class="tl-desc">Deploy en Vercel + Supabase Cloud. Seed de usuarios beta en Santiago. Monitoreo con Sentry. Feedback loop activado.</div>
+          <div class="tl-tags">
+            <span class="badge badge-green">Produccion</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>Post-MVP (mes 3-6)</h3>
+        <div class="rules-list mt-2">
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">PWA + notificaciones push</div>
+              <div class="rule-desc">Service Worker, instalacion en home screen, Web Push para invitaciones urgentes.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Chat de partido</div>
+              <div class="rule-desc">Canal de Supabase Realtime por partido para coordinacion rapida.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Activar planes de pago</div>
+              <div class="rule-desc">Stripe integration. Billing portal. Feature flags por plan.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Expansion de comunas</div>
+              <div class="rule-desc">Seed de usuarios en ciudades fuera de Santiago: Valparaiso, Concepcion, Temuco.</div>
+            </div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-num">→</div>
+            <div class="rule-content">
+              <div class="rule-title">Modulo Liga</div>
+              <div class="rule-desc">Tabla de posiciones, resultados, fixture automatico para torneos locales.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // Highlight nav link activo al hacer scroll
+  const links = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('.section-anchor');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.style.color = '');
+        links.forEach(l => {
+          if (l.getAttribute('href') === '#' + e.target.id) {
+            l.style.color = 'var(--gold)';
+            l.style.borderLeftColor = 'var(--gold)';
+          }
+        });
+      }
+    });
+  }, { threshold: .25 });
+
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

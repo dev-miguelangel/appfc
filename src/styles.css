@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+/* ── Design tokens ───────────────────────────────── */
+:root {
+  --color-gold:    #f0c040;
+  --color-gold2:   #c8860a;
+  --color-green:   #00d068;
+  --color-green2:  #007a40;
+  --color-dark:    #080c14;
+  --color-dark2:   #0d1520;
+  --color-dark3:   #111d2e;
+  --color-mid:     #1a2a40;
+  --color-mid2:    #243550;
+  --color-border:  rgba(255, 255, 255, 0.07);
+  --color-light:   #cdd8e8;
+}
+
+/* ── Base ────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-dark);
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* ── Typography ──────────────────────────────────── */
+.font-display {
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Clip-path helpers ───────────────────────────── */
+.clip-skew {
+  clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+}
+
+.clip-skew-sm {
+  clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+}
