@@ -1,0 +1,316 @@
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { EquiposService } from '../../../core/equipos/equipos.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { EquipoDetalle, EquipoMiembroConPerfil } from '../../../core/models/equipo.model';
+import { UsuarioPerfil } from '../../../core/auth/auth.service';
+
+const POSICION_LABEL: Record<string, string> = {
+  portero: 'POR', defensa: 'DEF', volante: 'VOL', delantero: 'DEL',
+};
+
+@Component({
+  selector: 'app-equipo-detalle',
+  standalone: true,
+  imports: [RouterLink, FormsModule],
+  template: `
+    <div class="page">
+      <a routerLink="/app/equipos" class="back-link">← Mis equipos</a>
+
+      @if (loading()) {
+        <div class="loading">Cargando...</div>
+      } @else if (equipo()) {
+        <div class="equipo-header">
+          <div class="escudo-wrap">
+            @if (equipo()!.escudo_url) {
+              <img [src]="equipo()!.escudo_url!" [alt]="equipo()!.nombre" class="escudo-img" />
+            } @else {
+              <span class="font-display escudo-letter">{{ equipo()!.nombre.charAt(0) }}</span>
+            }
+            @if (esCapitan()) {
+              <label class="escudo-edit" title="Cambiar escudo">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>
+                </svg>
+                <input type="file" accept="image/*" (change)="cambiarEscudo($event)" hidden />
+              </label>
+            }
+          </div>
+          <div>
+            <h1 class="font-display equipo-nombre">{{ equipo()!.nombre }}</h1>
+            <div class="equipo-meta">
+              <span class="badge-count">{{ activosCount() }} jugadores</span>
+              @if (esCapitan()) { <span class="badge-capitan">Capitan</span> }
+            </div>
+          </div>
+        </div>
+
+        <!-- Buscador de invitaciones (solo capitan) -->
+        @if (esCapitan()) {
+          <div class="invite-section">
+            <h2 class="section-title">Invitar jugador</h2>
+            <div class="search-wrap">
+              <input
+                type="text" [(ngModel)]="searchQuery"
+                (input)="buscar()"
+                placeholder="Buscar por nombre..."
+                class="form-input"
+              />
+            </div>
+
+            @if (buscando()) {
+              <p class="search-hint">Buscando...</p>
+            } @else if (resultados().length) {
+              <div class="resultados">
+                @for (u of resultados(); track u.id) {
+                  <div class="resultado-card">
+                    <div class="result-avatar">
+                      @if (u.foto_url) {
+                        <img [src]="u.foto_url" [alt]="u.nombre" />
+                      } @else {
+                        <span class="font-display">{{ u.nombre.charAt(0) }}</span>
+                      }
+                    </div>
+                    <div class="result-info">
+                      <div class="result-nombre">{{ u.nombre }}</div>
+                      <div class="result-meta">
+                        {{ posLabel(u.posicion) }} · {{ u.comuna }}
+                      </div>
+                    </div>
+                    <button
+                      class="btn-invitar"
+                      (click)="invitar(u)"
+                      [disabled]="invitando() === u.id"
+                    >
+                      {{ invitando() === u.id ? '...' : 'Invitar' }}
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else if (searchQuery.length >= 2) {
+              <p class="search-hint">Sin resultados para "{{ searchQuery }}"</p>
+            }
+          </div>
+        }
+
+        <!-- Lista de miembros -->
+        <div class="miembros-section">
+          <h2 class="section-title">Plantilla ({{ activosCount() }})</h2>
+          <div class="miembros-list">
+            @for (m of miembrosActivos(); track m.id) {
+              <div class="miembro-row" [class.capitan-row]="m.rol === 'capitan'">
+                <div class="m-avatar">
+                  @if (m.usuario.foto_url) {
+                    <img [src]="m.usuario.foto_url" [alt]="m.usuario.nombre" />
+                  } @else {
+                    <span class="font-display">{{ m.usuario.nombre.charAt(0) }}</span>
+                  }
+                </div>
+                <div class="m-info">
+                  <div class="m-nombre">
+                    {{ m.usuario.nombre }}
+                    @if (m.rol === 'capitan') { <span class="badge-capitan-sm">C</span> }
+                  </div>
+                  <div class="m-meta">{{ posLabel(m.usuario.posicion) }} · {{ m.usuario.comuna }}</div>
+                </div>
+                <div class="m-rep">
+                  <div class="rep-num font-display">{{ avgRep(m.usuario) }}</div>
+                  <div class="rep-lbl">REP</div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Pendientes -->
+          @if (miembrosPendientes().length) {
+            <h2 class="section-title" style="margin-top:1.5rem">Invitaciones enviadas ({{ miembrosPendientes().length }})</h2>
+            <div class="miembros-list">
+              @for (m of miembrosPendientes(); track m.id) {
+                <div class="miembro-row pending">
+                  <div class="m-avatar">
+                    @if (m.usuario.foto_url) {
+                      <img [src]="m.usuario.foto_url" [alt]="m.usuario.nombre" />
+                    } @else {
+                      <span class="font-display">{{ m.usuario.nombre.charAt(0) }}</span>
+                    }
+                  </div>
+                  <div class="m-info">
+                    <div class="m-nombre">{{ m.usuario.nombre }}</div>
+                    <div class="m-meta pending-badge">Pendiente</div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="error-msg">Equipo no encontrado.</p>
+      }
+    </div>
+  `,
+  styles: [`
+    .page { max-width: 680px; }
+    .back-link { color: var(--color-light); font-size: .82rem; text-decoration: none; display: inline-block; margin-bottom: 1.25rem; transition: color .2s; }
+    .back-link:hover { color: #fff; }
+    .loading { color: var(--color-light); padding: 2rem 0; }
+    .equipo-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+    .escudo-wrap {
+      position: relative; width: 80px; height: 80px; border-radius: 14px;
+      background: rgba(240,192,64,.1); border: 1px solid rgba(240,192,64,.25);
+      display: flex; align-items: center; justify-content: center; overflow: visible; flex-shrink: 0;
+    }
+    .escudo-img { width: 80px; height: 80px; border-radius: 14px; object-fit: cover; }
+    .escudo-letter { font-size: 2.8rem; color: var(--color-gold); }
+    .escudo-edit {
+      position: absolute; bottom: -6px; right: -6px;
+      background: var(--color-gold); color: var(--color-dark);
+      border-radius: 50%; width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.4);
+    }
+    .equipo-nombre { font-size: 2.2rem; color: #fff; margin-bottom: .4rem; }
+    .equipo-meta { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+    .badge-count { font-size: .75rem; color: var(--color-light); }
+    .badge-capitan {
+      background: rgba(240,192,64,.12); border: 1px solid rgba(240,192,64,.3);
+      color: var(--color-gold); font-size: .65rem; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase; padding: .15rem .5rem; border-radius: 4px;
+    }
+    .invite-section, .miembros-section {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem;
+    }
+    .section-title { font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--color-light); margin-bottom: 1rem; }
+    .search-wrap { margin-bottom: .75rem; }
+    .form-input {
+      width: 100%; padding: .7rem .9rem; border-radius: 8px; box-sizing: border-box;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+      color: #fff; font-size: .92rem; outline: none; transition: border-color .2s;
+    }
+    .form-input:focus { border-color: var(--color-gold); }
+    .search-hint { color: rgba(255,255,255,.3); font-size: .82rem; }
+    .resultados { display: flex; flex-direction: column; gap: .6rem; }
+    .resultado-card {
+      display: flex; align-items: center; gap: .85rem;
+      background: rgba(255,255,255,.04); border-radius: 8px; padding: .75rem;
+    }
+    .result-avatar {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .result-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .result-avatar span { font-size: 1rem; color: var(--color-gold); }
+    .result-info { flex: 1; }
+    .result-nombre { font-weight: 600; color: #fff; font-size: .9rem; }
+    .result-meta { font-size: .75rem; color: var(--color-light); margin-top: .1rem; }
+    .btn-invitar {
+      background: rgba(0,208,104,.12); border: 1px solid rgba(0,208,104,.3);
+      color: var(--color-green); padding: .4rem .9rem; border-radius: 6px;
+      font-size: .78rem; font-weight: 700; cursor: pointer; transition: background .2s;
+      white-space: nowrap;
+    }
+    .btn-invitar:hover { background: rgba(0,208,104,.2); }
+    .btn-invitar:disabled { opacity: .5; cursor: not-allowed; }
+    .miembros-list { display: flex; flex-direction: column; gap: .6rem; }
+    .miembro-row {
+      display: flex; align-items: center; gap: .85rem;
+      padding: .75rem; border-radius: 8px; background: rgba(255,255,255,.03);
+    }
+    .miembro-row.capitan-row { background: rgba(240,192,64,.04); }
+    .miembro-row.pending { opacity: .6; }
+    .m-avatar {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .m-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .m-avatar span { font-size: 1.1rem; color: var(--color-gold); }
+    .m-info { flex: 1; }
+    .m-nombre { font-weight: 600; color: #fff; font-size: .92rem; display: flex; align-items: center; gap: .4rem; }
+    .m-meta { font-size: .75rem; color: var(--color-light); margin-top: .1rem; }
+    .badge-capitan-sm {
+      background: var(--color-gold); color: var(--color-dark);
+      font-size: .6rem; font-weight: 900; padding: .1rem .35rem; border-radius: 3px;
+    }
+    .pending-badge { color: rgba(240,192,64,.6); }
+    .m-rep { text-align: center; }
+    .rep-num { font-size: 1.3rem; color: var(--color-gold); line-height: 1; }
+    .rep-lbl { font-size: .58rem; font-weight: 700; letter-spacing: .06em; color: rgba(255,255,255,.3); text-transform: uppercase; }
+    .error-msg { color: #ff6b6b; }
+  `],
+})
+export class EquipoDetalleComponent implements OnInit {
+  private route  = inject(ActivatedRoute);
+  private svc    = inject(EquiposService);
+  readonly auth  = inject(AuthService);
+
+  readonly equipo   = signal<EquipoDetalle | null>(null);
+  readonly loading  = signal(true);
+  readonly buscando = signal(false);
+  readonly resultados = signal<UsuarioPerfil[]>([]);
+  readonly invitando  = signal<string | null>(null);
+
+  searchQuery = '';
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  readonly esCapitan = () =>
+    this.equipo()?.capitan_id === this.auth.userId();
+
+  readonly miembrosActivos = (): EquipoMiembroConPerfil[] =>
+    this.equipo()?.miembros.filter(m => m.estado === 'activo') ?? [];
+
+  readonly miembrosPendientes = (): EquipoMiembroConPerfil[] =>
+    this.equipo()?.miembros.filter(m => m.estado === 'pendiente') ?? [];
+
+  readonly activosCount = () => this.miembrosActivos().length;
+
+  async ngOnInit(): Promise<void> {
+    const id = this.route.snapshot.paramMap.get('id')!;
+    const data = await this.svc.getEquipo(id);
+    this.equipo.set(data);
+    this.loading.set(false);
+  }
+
+  buscar(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    if (this.searchQuery.length < 2) { this.resultados.set([]); return; }
+    this.buscando.set(true);
+    this.searchTimer = setTimeout(async () => {
+      const usuarios = await this.svc.buscarUsuarios(
+        this.searchQuery,
+        this.equipo()?.id,
+      );
+      this.resultados.set(usuarios);
+      this.buscando.set(false);
+    }, 300);
+  }
+
+  async invitar(u: UsuarioPerfil): Promise<void> {
+    const eq = this.equipo();
+    if (!eq) return;
+    this.invitando.set(u.id);
+    await this.svc.invitarMiembro(eq.id, u.id);
+    // Recargar para mostrar pendiente
+    const updated = await this.svc.getEquipo(eq.id);
+    this.equipo.set(updated);
+    this.resultados.set(this.resultados().filter(r => r.id !== u.id));
+    this.invitando.set(null);
+  }
+
+  async cambiarEscudo(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    const eq = this.equipo();
+    if (!file || !eq) return;
+    const url = await this.svc.uploadEscudo(eq.id, file);
+    if (url) this.equipo.set({ ...eq, escudo_url: url });
+  }
+
+  posLabel(pos: string | null | undefined): string {
+    return pos ? (POSICION_LABEL[pos] ?? pos) : '—';
+  }
+
+  avgRep(u: { rep_asistencia: number; rep_puntualidad: number; rep_compromiso: number }): number {
+    return Math.round((u.rep_asistencia + u.rep_puntualidad + u.rep_compromiso) / 3);
+  }
+}

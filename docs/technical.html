@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppFC — Documentación Técnica</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    /* ── Design tokens ── */
+    :root {
+      --gold:   #f0c040;
+      --gold2:  #c8860a;
+      --green:  #00d068;
+      --red:    #ff6b6b;
+      --blue:   #40c4f0;
+      --dark:   #080c14;
+      --dark2:  #0d1520;
+      --mid:    #1a2a40;
+      --border: rgba(255,255,255,.08);
+      --light:  #cdd8e8;
+      --text:   #e4ecf5;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ══════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════ */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--dark2);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 0;
+    }
+    .sidebar-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: .1em;
+      color: var(--gold);
+      padding: 0 1.5rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: block;
+      text-decoration: none;
+    }
+    .sidebar-logo span { color: #fff; }
+    .sidebar-logo small {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: .6rem;
+      font-weight: 600;
+      letter-spacing: .15em;
+      color: var(--light);
+      margin-top: .1rem;
+    }
+    .nav-section {
+      padding: .75rem 1.5rem .25rem;
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .45rem 1.5rem;
+      color: var(--light);
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 500;
+      border-left: 2px solid transparent;
+      transition: color .15s, background .15s, border-color .15s;
+    }
+    .sidebar nav a:hover {
+      color: #fff;
+      background: rgba(255,255,255,.05);
+      border-left-color: rgba(240,192,64,.4);
+    }
+    .sidebar nav a .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem;
+      color: rgba(255,255,255,.25);
+      min-width: 1.4rem;
+    }
+
+    /* ══════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════ */
+    .content {
+      flex: 1;
+      max-width: 900px;
+      padding: 3rem 3.5rem;
+      overflow-x: hidden;
+    }
+
+    section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+
+    /* ── Headings ── */
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      color: var(--gold);
+      letter-spacing: .06em;
+      line-height: 1;
+      margin-bottom: .5rem;
+    }
+    h1 span { color: #fff; }
+    .doc-subtitle {
+      color: var(--light);
+      font-size: .85rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: .06em;
+      color: #fff;
+      margin-bottom: 1.25rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h2 .accent { color: var(--gold); }
+    h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin: 1.5rem 0 .6rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-size: .78rem;
+    }
+    h4 {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin: 1.25rem 0 .5rem;
+    }
+
+    p { color: var(--light); font-size: .9rem; margin-bottom: .75rem; }
+    p strong { color: #fff; }
+    p a { color: var(--gold); text-decoration: none; }
+    p a:hover { text-decoration: underline; }
+
+    /* ── Chips / badges ── */
+    .badge {
+      display: inline-block;
+      font-size: .62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      padding: .15rem .55rem;
+      border-radius: 20px;
+    }
+    .badge-gold  { background: rgba(240,192,64,.15);  color: var(--gold); }
+    .badge-green { background: rgba(0,208,104,.12);   color: var(--green); }
+    .badge-red   { background: rgba(255,107,107,.12); color: var(--red); }
+    .badge-blue  { background: rgba(64,196,240,.12);  color: var(--blue); }
+    .badge-gray  { background: rgba(255,255,255,.08); color: var(--light); }
+
+    /* ── Cards ── */
+    .card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-gold { border-color: rgba(240,192,64,.2); background: rgba(240,192,64,.03); }
+    .card-green { border-color: rgba(0,208,104,.2); background: rgba(0,208,104,.02); }
+    .card-red { border-color: rgba(255,107,107,.2); background: rgba(255,107,107,.02); }
+
+    /* ── Code blocks ── */
+    pre, code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+    }
+    code {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: .1rem .4rem;
+      border-radius: 4px;
+      color: #e0e0e0;
+    }
+    pre {
+      background: #0a1020;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.55;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #cdd8e8;
+    }
+    .kw  { color: #c792ea; }   /* keyword */
+    .str { color: #c3e88d; }   /* string */
+    .cmt { color: #546e7a; }   /* comment */
+    .fn  { color: #82aaff; }   /* function */
+    .tp  { color: #ffcb6b; }   /* type */
+    .op  { color: #89ddff; }   /* operator */
+    .num { color: #f78c6c; }   /* number */
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+    thead th {
+      background: rgba(240,192,64,.08);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      padding: .65rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(240,192,64,.2);
+    }
+    tbody td {
+      padding: .6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--light);
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: rgba(255,255,255,.02); }
+    td code { font-size: .72rem; }
+
+    /* ── ER diagram ── */
+    .er-diagram {
+      background: #0a1020;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 10px;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    .er-diagram pre {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font-size: .72rem;
+      line-height: 1.6;
+      color: #cdd8e8;
+    }
+    .er-tbl  { color: var(--gold); }
+    .er-pk   { color: var(--green); }
+    .er-fk   { color: var(--blue); }
+    .er-line { color: rgba(255,255,255,.3); }
+    .er-rel  { color: #c792ea; }
+
+    /* ── Checklists ── */
+    .checklist { list-style: none; margin: .5rem 0; }
+    .checklist li {
+      display: flex;
+      gap: .6rem;
+      align-items: flex-start;
+      padding: .4rem 0;
+      font-size: .85rem;
+      color: var(--light);
+    }
+    .checklist li::before {
+      content: '○';
+      color: rgba(255,255,255,.25);
+      flex-shrink: 0;
+      margin-top: .05rem;
+    }
+    .checklist li.done::before { content: '✓'; color: var(--green); }
+    .checklist li.warn::before { content: '⚠'; color: var(--gold); }
+    .checklist li.todo::before { content: '→'; color: var(--blue); }
+
+    /* ── Step list ── */
+    .steps { list-style: none; counter-reset: step; }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: .9rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .88rem;
+      color: var(--light);
+    }
+    .steps li:last-child { border-bottom: none; }
+    .steps li::before {
+      content: counter(step);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(240,192,64,.12);
+      border: 1px solid rgba(240,192,64,.3);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: .75rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Rule cards ── */
+    .rule {
+      display: flex;
+      gap: 1rem;
+      padding: .85rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .85rem;
+    }
+    .rule:last-child { border-bottom: none; }
+    .rule-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: .1rem; }
+    .rule-title { color: #fff; font-weight: 600; font-size: .88rem; margin-bottom: .2rem; }
+    .rule-desc { color: var(--light); line-height: 1.5; }
+
+    /* ── Info callout ── */
+    .callout {
+      display: flex;
+      gap: .75rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: .85rem;
+    }
+    .callout-info  { background: rgba(64,196,240,.07);  border: 1px solid rgba(64,196,240,.2); }
+    .callout-warn  { background: rgba(240,192,64,.07);  border: 1px solid rgba(240,192,64,.2); }
+    .callout-ok    { background: rgba(0,208,104,.06);   border: 1px solid rgba(0,208,104,.2); }
+    .callout-icon  { font-size: 1.1rem; flex-shrink: 0; }
+    .callout p     { margin: 0; color: var(--light); }
+
+    /* ── Flag cards ── */
+    .flag-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: .75rem;
+    }
+    .flag-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      color: var(--blue);
+      font-weight: 600;
+      margin-bottom: .35rem;
+    }
+    .flag-type {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+      color: #c792ea;
+    }
+    .flag-desc { font-size: .82rem; color: var(--light); margin: .35rem 0 0; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .content { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<aside class="sidebar">
+  <a href="#top" class="sidebar-logo">App<span>FC</span><small>Documentación Técnica v1.0</small></a>
+  <div class="nav-section">Proyecto</div>
+  <nav>
+    <a href="#overview"><span class="num">01</span> Descripción General</a>
+    <a href="#stack"><span class="num">02</span> Stack Técnico</a>
+    <a href="#architecture"><span class="num">03</span> Arquitectura</a>
+  </nav>
+  <div class="nav-section">Base de datos</div>
+  <nav>
+    <a href="#database"><span class="num">04</span> Diagrama ER</a>
+    <a href="#tables"><span class="num">05</span> Tablas y columnas</a>
+    <a href="#migrations"><span class="num">06</span> Migraciones</a>
+  </nav>
+  <div class="nav-section">Lógica</div>
+  <nav>
+    <a href="#business-rules"><span class="num">07</span> Reglas de Negocio</a>
+    <a href="#reputation"><span class="num">08</span> Sistema de Reputación</a>
+    <a href="#notifications"><span class="num">09</span> Notificaciones</a>
+    <a href="#feature-flags"><span class="num">10</span> Feature Flags</a>
+    <a href="#pwa"><span class="num">11</span> PWA</a>
+  </nav>
+  <div class="nav-section">Despliegue</div>
+  <nav>
+    <a href="#production"><span class="num">12</span> Producción — Checklist</a>
+    <a href="#supabase-guide"><span class="num">13</span> Guía Supabase</a>
+  </nav>
+</aside>
+
+<!-- ══════════════════════════════════════
+     MAIN
+══════════════════════════════════════ -->
+<main class="content" id="top">
+
+  <!-- ── 01 Descripción General ── -->
+  <section id="overview">
+    <h1>App<span>FC</span></h1>
+    <p class="doc-subtitle">Documentación técnica — estado actual del proyecto</p>
+
+    <p><strong>AppFC</strong> es una plataforma para coordinar partidos de fútbol amateur en Chile. Permite a jugadores crear y gestionar equipos, programar partidos con confirmación bilateral, registrar resultados y mantener reputación basada en asistencia y compromiso.</p>
+
+    <div class="card card-gold">
+      <h4>Repositorio y dominio</h4>
+      <p>Repositorio: <code>dev-miguelangel/appfc</code><br/>
+      Rama principal: <code>main</code><br/>
+      Deploy: Vercel (pendiente configuración producción)</p>
+    </div>
+
+    <h3>Etapas completadas</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Etapa</th><th>Estado</th><th>Entregable clave</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Base + Landing page</td><td><span class="badge badge-green">Completada</span></td><td>Angular 21, routing, landing pública</td></tr>
+          <tr><td>2</td><td>Autenticación + Perfil</td><td><span class="badge badge-green">Completada</span></td><td>Google OAuth, email/pass, onboarding</td></tr>
+          <tr><td>3</td><td>Equipos</td><td><span class="badge badge-green">Completada</span></td><td>Crear equipo, invitar miembros, escudo</td></tr>
+          <tr><td>4</td><td>Partidos</td><td><span class="badge badge-green">Completada</span></td><td>Crear partido, convocatorias, asistencia</td></tr>
+          <tr><td>5</td><td>Resultado y Reputación</td><td><span class="badge badge-green">Completada</span></td><td>Confirmación bilateral, cálculo rep.</td></tr>
+          <tr><td>5b</td><td>Negociación bilateral</td><td><span class="badge badge-green">Completada</span></td><td>Aceptación visitante, solicitudes, notif.</td></tr>
+          <tr><td>6</td><td>Búsqueda de reemplazos</td><td><span class="badge badge-gray">Pendiente</span></td><td>Candidatos por posición/comuna</td></tr>
+          <tr><td>7</td><td>Notificaciones realtime</td><td><span class="badge badge-gray">Pendiente</span></td><td>WebSockets Supabase</td></tr>
+          <tr><td>8</td><td>Canchas / Lugares</td><td><span class="badge badge-gray">Pendiente</span></td><td>Directorio de canchas</td></tr>
+          <tr><td>9</td><td>PWA + Responsive</td><td><span class="badge badge-green">Completada</span></td><td>Service worker, manifest, bottom nav</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── 02 Stack Técnico ── -->
+  <section id="stack">
+    <h2>02 <span class="accent">Stack Técnico</span></h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Capa</th><th>Tecnología</th><th>Versión</th><th>Notas</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend</td><td>Angular</td><td>21.x</td><td>Standalone components, Signals, lazy routes</td></tr>
+          <tr><td>Estilos</td><td>Tailwind CSS</td><td>v4</td><td>via <code>@tailwindcss/postcss</code></td></tr>
+          <tr><td>Backend / DB</td><td>Supabase</td><td>—</td><td>PostgreSQL, Auth, Storage, RLS</td></tr>
+          <tr><td>Auth</td><td>Supabase Auth</td><td>—</td><td>Google OAuth + email/password</td></tr>
+          <tr><td>Storage</td><td>Supabase Storage</td><td>—</td><td>Bucket <code>fotos</code> para avatares y escudos</td></tr>
+          <tr><td>PWA</td><td>@angular/service-worker</td><td>21.x</td><td>Activo solo en producción</td></tr>
+          <tr><td>Deploy</td><td>Vercel</td><td>—</td><td>Pendiente configuración</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── 03 Arquitectura ── -->
+  <section id="architecture">
+    <h2>03 <span class="accent">Arquitectura Angular</span></h2>
+    <h3>Estructura de carpetas</h3>
+<pre><code>src/app/
+  core/
+    auth/           ← AuthService, guards (authGuard, publicGuard)
+    equipos/        ← EquiposService
+    local-db/       ← MockSupabaseClient, LocalStore, seed.ts
+    models/         ← Interfaces TypeScript (partido, equipo, solicitud…)
+    notificaciones/ ← NotificacionesService
+    partidos/       ← PartidosService
+    resultados/     ← ResultadosService
+    solicitudes/    ← SolicitudesService
+    supabase/       ← SUPABASE_CLIENT token, provideSupabase()
+  features/
+    landing/        ← Landing pública
+    auth/           ← AuthComponent, CallbackComponent
+    shell/          ← Layout autenticado
+      dashboard/    ← DashboardComponent
+      equipos/      ← EquiposListComponent, EquipoDetalleComponent…
+      onboarding/   ← OnboardingComponent
+      partidos/     ← PartidosListComponent, PartidoDetalleComponent…
+      perfil/       ← PerfilComponent
+  app.config.ts     ← providers globales (router, supabase, SW)
+  app.routes.ts     ← rutas lazy de nivel raíz</code></pre>
+
+    <h3>Routing</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ruta</th><th>Componente</th><th>Guard</th></tr></thead>
+        <tbody>
+          <tr><td><code>/</code></td><td>LandingComponent</td><td>—</td></tr>
+          <tr><td><code>/auth</code></td><td>AuthComponent</td><td>publicGuard (redirige si ya logueado)</td></tr>
+          <tr><td><code>/auth/callback</code></td><td>AuthCallbackComponent</td><td>—</td></tr>
+          <tr><td><code>/app/dashboard</code></td><td>DashboardComponent</td><td>authGuard</td></tr>
+          <tr><td><code>/app/equipos</code></td><td>EquiposListComponent</td><td>authGuard</td></tr>
+          <tr><td><code>/app/equipos/:id</code></td><td>EquipoDetalleComponent</td><td>authGuard</td></tr>
+          <tr><td><code>/app/partidos</code></td><td>PartidosListComponent</td><td>authGuard</td></tr>
+          <tr><td><code>/app/partidos/nuevo</code></td><td>PartidoNuevoComponent</td><td>authGuard</td></tr>
+          <tr><td><code>/app/partidos/:id</code></td><td>PartidoDetalleComponent</td><td>authGuard</td></tr>
+          <tr><td><code>/app/perfil</code></td><td>PerfilComponent</td><td>authGuard</td></tr>
+          <tr><td><code>/app/onboarding</code></td><td>OnboardingComponent</td><td>authGuard</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Modo local (Mock)</h3>
+    <p>Cuando <code>environment.useLocalDb = true</code>, el token <code>SUPABASE_CLIENT</code> provee un <code>MockSupabaseClient</code> que simula la misma API superficial de <code>@supabase/supabase-js</code> usando <code>localStorage</code> como base de datos. Esto permite desarrollar sin conexión a Supabase.</p>
+    <p>El <code>LocalStore</code> persiste arrays JSON bajo claves <code>ldb_&lt;tabla&gt;</code>. El <code>QueryBuilder</code> del mock soporta: <code>select()</code>, <code>eq()</code>, <code>neq()</code>, <code>ilike()</code>, <code>order()</code>, <code>limit()</code>, <code>insert()</code>, <code>update()</code>, <code>delete()</code>, <code>single()</code>, <code>upsert()</code>.</p>
+  </section>
+
+  <!-- ── 04 Diagrama ER ── -->
+  <section id="database">
+    <h2>04 <span class="accent">Diagrama Entidad-Relación</span></h2>
+    <div class="er-diagram">
+<pre>
+<span class="er-line">┌─────────────────┐  1:1   ┌──────────────────────────────────┐</span>
+<span class="er-line">│</span> <span class="er-tbl">auth.users</span>       <span class="er-line">│</span> <span class="er-rel">──────►</span> <span class="er-line">│</span> <span class="er-tbl">public.usuarios</span>                   <span class="er-line">│</span>
+<span class="er-line">│</span> <span class="er-pk">id</span> uuid PK       <span class="er-line">│</span>        <span class="er-line">│</span> <span class="er-pk">id</span> uuid PK (<span class="er-fk">FK → auth.users</span>)    <span class="er-line">│</span>
+<span class="er-line">│</span> email            <span class="er-line">│</span>        <span class="er-line">│</span> nombre, edad, comuna              <span class="er-line">│</span>
+<span class="er-line">│</span> (gestionado      <span class="er-line">│</span>        <span class="er-line">│</span> posicion (portero|defensa|…)      <span class="er-line">│</span>
+<span class="er-line">│</span>  por Supabase)   <span class="er-line">│</span>        <span class="er-line">│</span> foto_url, rep_asistencia (0-100)  <span class="er-line">│</span>
+<span class="er-line">└─────────────────┘</span>        <span class="er-line">│</span> rep_puntualidad (0-100)           <span class="er-line">│</span>
+                            <span class="er-line">│</span> rep_compromiso (0-100)            <span class="er-line">│</span>
+                            <span class="er-line">│</span> created_at                        <span class="er-line">│</span>
+                            <span class="er-line">└──────────────┬───────────────────┘</span>
+                                           <span class="er-line">│ 1:N</span>
+  <span class="er-line">┌───────────────────────┐</span>    <span class="er-line">┌──────────▼──────────────────────┐</span>
+  <span class="er-line">│</span> <span class="er-tbl">public.equipos</span>         <span class="er-line">│</span>    <span class="er-line">│</span> <span class="er-tbl">public.equipo_miembros</span>           <span class="er-line">│</span>
+  <span class="er-line">│</span> <span class="er-pk">id</span> uuid PK             <span class="er-line">│</span>    <span class="er-line">│</span> <span class="er-pk">id</span> uuid PK                      <span class="er-line">│</span>
+  <span class="er-line">│</span> nombre, ciudad         <span class="er-line">│ ◄──│</span> <span class="er-fk">equipo_id</span> FK                    <span class="er-line">│</span>
+  <span class="er-line">│</span> <span class="er-fk">capitan_id</span> FK → usu.  <span class="er-line">│</span>    <span class="er-line">│</span> <span class="er-fk">usuario_id</span> FK                   <span class="er-line">│</span>
+  <span class="er-line">│</span> escudo_url, descr.     <span class="er-line">│</span>    <span class="er-line">│</span> rol (capitan|jugador)            <span class="er-line">│</span>
+  <span class="er-line">│</span> created_at             <span class="er-line">│</span>    <span class="er-line">│</span> estado (activo|inactivo|…)       <span class="er-line">│</span>
+  <span class="er-line">└──────────┬────────────┘</span>    <span class="er-line">└─────────────────────────────────┘</span>
+             <span class="er-line">│ 1:N (local y visitante)</span>
+  <span class="er-line">┌──────────▼───────────────────────────────────────────────────┐</span>
+  <span class="er-line">│</span> <span class="er-tbl">public.partidos</span>                                                <span class="er-line">│</span>
+  <span class="er-line">│</span> <span class="er-pk">id</span> uuid PK                                                     <span class="er-line">│</span>
+  <span class="er-line">│</span> <span class="er-fk">equipo_local_id</span> FK · <span class="er-fk">equipo_visitante_id</span> FK · <span class="er-fk">creador_id</span> FK   <span class="er-line">│</span>
+  <span class="er-line">│</span> tipo_futbol (futbol5|7|8|11)  max_jugadores_equipo (int)       <span class="er-line">│</span>
+  <span class="er-line">│</span> fecha (timestamptz)  lugar (text)                              <span class="er-line">│</span>
+  <span class="er-line">│</span> estado: <span class="er-rel">programado | en_disputa | completado | cancelado</span>       <span class="er-line">│</span>
+  <span class="er-line">│</span> aceptacion_visitante: <span class="er-rel">pendiente | aceptada | rechazada</span>         <span class="er-line">│</span>
+  <span class="er-line">│</span> goles_local · goles_visitante · result_conf_local · _visit     <span class="er-line">│</span>
+  <span class="er-line">│</span> score_local (jsonb {local,visitante}) · score_visit (jsonb)    <span class="er-line">│</span>
+  <span class="er-line">└────┬──────────────────────────┬───────────────────┬──────────┘</span>
+       <span class="er-line">│ 1:N</span>                      <span class="er-line">│ 1:N</span>               <span class="er-line">│ 1:N</span>
+  <span class="er-line">┌────▼──────────────┐  ┌─────▼──────────────┐  ┌──▼──────────────────┐</span>
+  <span class="er-line">│</span> <span class="er-tbl">partido_jugadores</span>  <span class="er-line">│  │</span> <span class="er-tbl">partido_solicitudes</span> <span class="er-line">│  │</span> <span class="er-tbl">notificaciones</span>       <span class="er-line">│</span>
+  <span class="er-line">│</span> <span class="er-pk">id</span> · <span class="er-fk">partido_id</span>    <span class="er-line">│  │</span> <span class="er-pk">id</span> · <span class="er-fk">partido_id</span>     <span class="er-line">│  │</span> <span class="er-pk">id</span>                   <span class="er-line">│</span>
+  <span class="er-line">│</span> <span class="er-fk">usuario_id</span>         <span class="er-line">│  │</span> <span class="er-fk">solicitante_id</span>     <span class="er-line">│  │</span> <span class="er-fk">usuario_id</span> (destino)  <span class="er-line">│</span>
+  <span class="er-line">│</span> <span class="er-fk">equipo_id</span>          <span class="er-line">│  │</span> tipo (edicion|canc) <span class="er-line">│  │</span> <span class="er-fk">partido_id</span> (nullable) <span class="er-line">│</span>
+  <span class="er-line">│</span> estado (conv.)     <span class="er-line">│  │</span> estado (pend|apr|…) <span class="er-line">│  │</span> tipo (enum)           <span class="er-line">│</span>
+  <span class="er-line">│</span> asistio (bool)     <span class="er-line">│  │</span> nueva_fecha (text)  <span class="er-line">│  │</span> mensaje (text)        <span class="er-line">│</span>
+  <span class="er-line">└───────────────────┘  │</span> nuevo_lugar (text)  <span class="er-line">│  │</span> leida (bool)          <span class="er-line">│</span>
+                         <span class="er-line">└────────────────────┘  └─────────────────────┘</span>
+</pre>
+    </div>
+
+    <div class="callout callout-info" style="margin-top:1rem">
+      <span class="callout-icon">ℹ️</span>
+      <p><strong>Constraint:</strong> <code>partidos.equipo_local_id &lt;&gt; partidos.equipo_visitante_id</code> asegura que un equipo no pueda jugar contra sí mismo. <strong>UNIQUE:</strong> <code>(partido_id, usuario_id)</code> en <code>partido_jugadores</code> evita duplicados en la convocatoria.</p>
+    </div>
+  </section>
+
+  <!-- ── 05 Tablas ── -->
+  <section id="tables">
+    <h2>05 <span class="accent">Tablas y Columnas</span></h2>
+
+    <h4>public.usuarios</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>uuid PK</td><td>FK → auth.users. Creado por trigger en signup.</td></tr>
+        <tr><td><code>nombre</code></td><td>text</td><td>Nombre público del jugador.</td></tr>
+        <tr><td><code>edad</code></td><td>int</td><td>Nullable hasta completar onboarding.</td></tr>
+        <tr><td><code>comuna</code></td><td>text</td><td>Para matching geográfico futuro.</td></tr>
+        <tr><td><code>posicion</code></td><td>enum</td><td><code>portero | defensa | volante | delantero</code></td></tr>
+        <tr><td><code>foto_url</code></td><td>text</td><td>URL pública del bucket <code>fotos</code>.</td></tr>
+        <tr><td><code>rep_asistencia</code></td><td>int [0-100]</td><td>Default 50. Actualizado por trigger tras partido completado.</td></tr>
+        <tr><td><code>rep_puntualidad</code></td><td>int [0-100]</td><td>Default 50.</td></tr>
+        <tr><td><code>rep_compromiso</code></td><td>int [0-100]</td><td>Default 50.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h4>public.equipos</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>uuid PK</td><td></td></tr>
+        <tr><td><code>nombre</code></td><td>text</td><td>Nombre del equipo.</td></tr>
+        <tr><td><code>capitan_id</code></td><td>uuid FK</td><td>→ usuarios. Solo el capitán puede editar el equipo.</td></tr>
+        <tr><td><code>escudo_url</code></td><td>text</td><td>Nullable. URL pública del bucket <code>fotos</code>.</td></tr>
+        <tr><td><code>descripcion</code></td><td>text</td><td>Nullable.</td></tr>
+        <tr><td><code>ciudad</code></td><td>text</td><td></td></tr>
+      </tbody>
+    </table></div>
+
+    <h4>public.partidos — columnas de resultado</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td><code>estado</code></td><td>enum</td><td><code>programado | en_disputa | completado | cancelado</code></td></tr>
+        <tr><td><code>aceptacion_visitante</code></td><td>enum</td><td><code>pendiente | aceptada | rechazada</code>. Default <code>pendiente</code>.</td></tr>
+        <tr><td><code>result_conf_local</code></td><td>bool</td><td>El capitán local ya envió su marcador.</td></tr>
+        <tr><td><code>result_conf_visit</code></td><td>bool</td><td>El capitán visitante ya envió su marcador.</td></tr>
+        <tr><td><code>score_local</code></td><td>jsonb</td><td><code>{"local": N, "visitante": N}</code> según el capitán local.</td></tr>
+        <tr><td><code>score_visit</code></td><td>jsonb</td><td>Ídem según el capitán visitante.</td></tr>
+        <tr><td><code>goles_local</code></td><td>int</td><td>Definitivo, copiado de <code>score_local</code> cuando ambos coinciden.</td></tr>
+        <tr><td><code>goles_visitante</code></td><td>int</td><td>Ídem.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h4>Enums definidos en PostgreSQL</h4>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tipo</th><th>Valores</th></tr></thead>
+      <tbody>
+        <tr><td><code>tipo_futbol</code></td><td>futbol5, futbol7, futbol8, futbol11</td></tr>
+        <tr><td><code>estado_partido</code></td><td>programado, en_disputa, completado, cancelado</td></tr>
+        <tr><td><code>estado_convocatoria</code></td><td>pendiente, confirmado, rechazado</td></tr>
+        <tr><td><code>posicion_jugador</code></td><td>portero, defensa, volante, delantero</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ── 06 Migraciones ── -->
+  <section id="migrations">
+    <h2>06 <span class="accent">Migraciones</span></h2>
+    <p>Todas las migraciones están en <code>supabase/migrations/</code> y deben ejecutarse <strong>en orden</strong>.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Archivo</th><th>Contenido</th></tr></thead>
+      <tbody>
+        <tr><td><code>20260407_etapa2_usuarios.sql</code></td><td>Tabla <code>usuarios</code>, trigger de signup, RLS básico</td></tr>
+        <tr><td><code>20260409_etapa3_equipos.sql</code></td><td>Tablas <code>equipos</code> y <code>equipo_miembros</code>, RLS</td></tr>
+        <tr><td><code>20260410_etapa4_partidos.sql</code></td><td>Enums, tablas <code>partidos</code> y <code>partido_jugadores</code>, índices, RLS</td></tr>
+        <tr><td><code>20260411_etapa5_resultados.sql</code></td><td>Columnas de resultado, función <code>recalcular_reputacion_partido</code>, triggers</td></tr>
+        <tr><td><code>20260412_notificaciones.sql</code></td><td>Tabla <code>notificaciones</code>, RLS</td></tr>
+        <tr><td><code>20260412b_solicitudes_partido.sql</code></td><td>Columna <code>aceptacion_visitante</code>, tabla <code>partido_solicitudes</code>, amplía tipos de notif.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Triggers en producción</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Trigger</th><th>Tabla</th><th>Cuándo</th><th>Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td><code>on_auth_user_created</code></td><td>auth.users</td><td>AFTER INSERT</td><td>Crea fila en <code>public.usuarios</code> con rep. 50/50/50</td></tr>
+        <tr><td><code>trg_verificar_resultado</code></td><td>partidos</td><td>BEFORE UPDATE</td><td>Si ambos <code>result_conf_*</code> = true, compara scores → completado o en_disputa</td></tr>
+        <tr><td><code>trg_on_partido_completado</code></td><td>partidos</td><td>AFTER UPDATE</td><td>Cuando estado cambia a <code>completado</code>, llama a <code>recalcular_reputacion_partido</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <p><strong>Mock:</strong> Los triggers no se ejecutan en modo <code>useLocalDb = true</code>. La lógica equivalente está en <code>ResultadosService.resolverBilateralMock()</code> y <code>actualizarReputacionesMock()</code>.</p>
+    </div>
+  </section>
+
+  <!-- ── 07 Reglas de negocio ── -->
+  <section id="business-rules">
+    <h2>07 <span class="accent">Reglas de Negocio</span></h2>
+
+    <h3>Equipos</h3>
+    <div class="card">
+      <div class="rule">
+        <span class="rule-icon">⚽</span>
+        <div><div class="rule-title">Solo capitanes crean partidos</div>
+        <div class="rule-desc">En el formulario <em>Nuevo Partido</em>, el equipo local solo muestra equipos donde <code>capitan_id === userId</code>. Un jugador sin equipos capitaneados no puede crear partidos.</div></div>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">🏃</span>
+        <div><div class="rule-title">Un equipo no puede jugar contra sí mismo</div>
+        <div class="rule-desc">Reforzado en BD con <code>CHECK (equipo_local_id &lt;&gt; equipo_visitante_id)</code> y en el selector del formulario que excluye el equipo ya elegido como local.</div></div>
+      </div>
+    </div>
+
+    <h3>Partidos — flujo de estados</h3>
+    <pre><code>  <span class="str">CREACIÓN</span>
+      ↓ (capitán local crea, visitante = pendiente)
+  <span class="kw">programado</span>  ←──────────────────────────────────────┐
+      │                                                   │
+      │ cap. visitante rechaza                            │ (futuro: mediación)
+      ▼                                                   │
+  <span class="kw">programado</span> (aceptacion_visitante = rechazada)         │
+      │                                                   │
+      │ cap. visitante acepta                             │
+      ▼                                                   │
+  <span class="kw">programado</span> (aceptacion_visitante = aceptada)          │
+      │                                                   │
+      ├──── cap. local cancela ──────────► <span class="tp">cancelado</span>        │
+      │                                                   │
+      │ ambos capitanes confirman marcador igual          │
+      ▼                                                   │
+  <span class="fn">completado</span>  (reputación calculada por trigger)         │
+      │                                                   │
+      │ ambos capitanes confirman marcador diferente      │
+      ▼                                                   │
+  <span class="num">en_disputa</span>  ────── revisión manual ──────────────────┘</code></pre>
+
+    <h3>Convocatoria automática</h3>
+    <div class="card">
+      <div class="rule">
+        <span class="rule-icon">📋</span>
+        <div><div class="rule-title">Auto-convocatoria al crear partido</div>
+        <div class="rule-desc">Al crear un partido, <code>PartidosService.autoConvocar()</code> itera sobre los miembros <em>activos</em> de ambos equipos y crea registros en <code>partido_jugadores</code> con <code>estado: 'pendiente'</code>. Evita duplicados con un <code>Set&lt;userId&gt;</code>.</div></div>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">✅</span>
+        <div><div class="rule-title">Respuesta individual de convocatoria</div>
+        <div class="rule-desc">Cada jugador puede confirmar o rechazar su convocatoria desde la vista de detalle del partido. Solo visible si <code>estado_convocatoria === 'pendiente'</code>.</div></div>
+      </div>
+    </div>
+
+    <h3>Asistencia</h3>
+    <div class="card">
+      <div class="rule">
+        <span class="rule-icon">🔒</span>
+        <div><div class="rule-title">Capitán solo pasa asistencia de su equipo</div>
+        <div class="rule-desc">El computed <code>miEquipoComoCapitan</code> identifica si el usuario es capitán del equipo local o visitante. Los checkboxes de asistencia solo se muestran para el equipo propio. En el servicio, la consulta incluye <code>.eq('equipo_id', equipo_id)</code>.</div></div>
+      </div>
+    </div>
+
+    <h3>Resultado bilateral y solicitudes</h3>
+    <div class="card">
+      <div class="rule">
+        <span class="rule-icon">🤝</span>
+        <div><div class="rule-title">El capitán visitante debe aceptar el partido</div>
+        <div class="rule-desc">Al crear un partido, <code>aceptacion_visitante</code> = <code>'pendiente'</code>. El capitán visitante ve un banner de aceptación/rechazo. Hasta que acepte, no puede solicitar cambios.</div></div>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">📝</span>
+        <div><div class="rule-title">Visitante propone, local aprueba</div>
+        <div class="rule-desc">El capitán visitante (si aceptó) puede solicitar edición de fecha/lugar o cancelación. La solicitud queda en <code>estado: 'pendiente'</code> hasta que el local la apruebe o rechace. Solo puede haber una solicitud pendiente por visitante.</div></div>
+      </div>
+      <div class="rule">
+        <span class="rule-icon">⚖️</span>
+        <div><div class="rule-title">Confirmación bilateral de marcador</div>
+        <div class="rule-desc">Cada capitán ingresa el marcador completo (goles_local, goles_visitante). En Supabase, el trigger <code>trg_verificar_resultado</code> compara los dos JSONb. En modo mock, <code>ResultadosService.resolverBilateralMock()</code> hace lo mismo en el cliente.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 08 Reputación ── -->
+  <section id="reputation">
+    <h2>08 <span class="accent">Sistema de Reputación</span></h2>
+    <p>La reputación se calcula automáticamente cuando un partido queda <code>completado</code>. Los tres índices están clampeados en <strong>[0, 100]</strong> con default inicial de <strong>50</strong>.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Condición</th><th>rep_asistencia</th><th>rep_puntualidad</th><th>rep_compromiso</th></tr></thead>
+      <tbody>
+        <tr><td>confirmado + asistió</td><td style="color:var(--green)">+3</td><td style="color:var(--green)">+2</td><td style="color:var(--green)">+2</td></tr>
+        <tr><td>confirmado + NO asistió</td><td style="color:var(--red)">−6</td><td style="color:var(--red)">−4</td><td style="color:var(--red)">−3</td></tr>
+        <tr><td>pendiente + asistió</td><td style="color:var(--green)">+1</td><td>—</td><td>—</td></tr>
+        <tr><td>rechazado (cualquiera)</td><td>—</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <p>En producción, el cálculo lo ejecuta la función PostgreSQL <code>public.recalcular_reputacion_partido(p_partido_id uuid)</code>. En modo mock, <code>ResultadosService.actualizarReputacionesMock()</code> replica la misma lógica en el cliente y llama a <code>auth.loadPerfil(uid)</code> para refrescar el signal reactivo.</p>
+    </div>
+  </section>
+
+  <!-- ── 09 Notificaciones ── -->
+  <section id="notifications">
+    <h2>09 <span class="accent">Notificaciones</span></h2>
+    <p>Las notificaciones son in-app (no push). Se crean en <code>public.notificaciones</code> y se leen mediante <code>NotificacionesService</code>. La campana en el shell muestra el conteo de no leídas y un panel dropdown.</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>tipo</th><th>Cuándo se crea</th><th>Destinatario</th></tr></thead>
+      <tbody>
+        <tr><td><code>partido_editado</code></td><td>Capitán local edita fecha/lugar</td><td>Todos los convocados (excepto editor)</td></tr>
+        <tr><td><code>partido_cancelado</code></td><td>Local cancela o aprueba solicitud de cancelación</td><td>Todos los convocados</td></tr>
+        <tr><td><code>partido_aceptado</code></td><td>Visitante acepta el partido</td><td>Todos los convocados</td></tr>
+        <tr><td><code>partido_rechazado</code></td><td>Visitante rechaza el partido</td><td>Todos los convocados del equipo local</td></tr>
+        <tr><td><code>solicitud_nueva</code></td><td>Visitante envía solicitud de edición/cancelación</td><td>Todos los convocados del equipo local</td></tr>
+        <tr><td><code>solicitud_aprobada</code></td><td>Local aprueba solicitud</td><td>Visitante (y equipo)</td></tr>
+        <tr><td><code>solicitud_rechazada</code></td><td>Local rechaza solicitud</td><td>Visitante (y equipo)</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ── 10 Feature Flags ── -->
+  <section id="feature-flags">
+    <h2>10 <span class="accent">Feature Flags</span></h2>
+    <p>Los flags se definen en <code>src/environments/environment.ts</code> (dev) y <code>environment.prod.ts</code> (prod).</p>
+
+    <div class="flag-card">
+      <div class="flag-name">environment.useLocalDb <span class="flag-type">boolean</span></div>
+      <div class="flag-desc">
+        <strong>true</strong> → Inyecta <code>MockSupabaseClient</code>. Sin conexión de red. Datos en <code>localStorage</code> bajo prefijo <code>ldb_</code>.<br/>
+        <strong>false</strong> → Usa <code>createClient(supabaseUrl, supabaseAnonKey)</code> real.<br/>
+        <em>⚠ Siempre <code>false</code> en producción.</em>
+      </div>
+    </div>
+
+    <div class="flag-card">
+      <div class="flag-name">environment.production <span class="flag-type">boolean</span></div>
+      <div class="flag-desc">
+        Controla el Service Worker a través de <code>provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode() })</code>.<br/>
+        También usado en <code>AuthComponent.isDev</code> para mostrar el formulario email/contraseña.
+      </div>
+    </div>
+
+    <div class="flag-card">
+      <div class="flag-name">environment.supabaseUrl <span class="flag-type">string</span></div>
+      <div class="flag-desc">URL del proyecto Supabase. Ej: <code>https://xxxx.supabase.co</code>. Ignorado cuando <code>useLocalDb = true</code>.</div>
+    </div>
+
+    <div class="flag-card">
+      <div class="flag-name">environment.supabaseAnonKey <span class="flag-type">string</span></div>
+      <div class="flag-desc">Clave anónima pública del proyecto Supabase. <em>No es un secreto</em> — es la clave de acceso público protegida por RLS.</div>
+    </div>
+
+    <h3>Configuración actual de desarrollo</h3>
+<pre><code><span class="kw">export const</span> environment = {
+  <span class="fn">production</span>:   <span class="kw">false</span>,
+  <span class="fn">useLocalDb</span>:   <span class="kw">true</span>,   <span class="cmt">// ← cambiar a false para probar con Supabase real</span>
+  <span class="fn">supabaseUrl</span>:  <span class="str">'YOUR_SUPABASE_URL'</span>,
+  <span class="fn">supabaseAnonKey</span>: <span class="str">'YOUR_SUPABASE_ANON_KEY'</span>,
+};</code></pre>
+  </section>
+
+  <!-- ── 11 PWA ── -->
+  <section id="pwa">
+    <h2>11 <span class="accent">PWA — Progressive Web App</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Archivo</th><th>Propósito</th></tr></thead>
+      <tbody>
+        <tr><td><code>public/manifest.webmanifest</code></td><td>Nombre, ícono, colores, <code>display: standalone</code>, <code>start_url: /app/dashboard</code></td></tr>
+        <tr><td><code>public/icons/appfc-icon.svg</code></td><td>Ícono SVG universal (<code>"sizes": "any"</code>)</td></tr>
+        <tr><td><code>ngsw-config.json</code></td><td>Configuración del service worker: caché de app-shell (prefetch) + assets (lazy) + Google Fonts (30d)</td></tr>
+        <tr><td><code>angular.json</code></td><td><code>"serviceWorker": "ngsw-config.json"</code> en la configuración <em>production</em></td></tr>
+        <tr><td><code>app.config.ts</code></td><td><code>provideServiceWorker(…, { enabled: !isDevMode() })</code></td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <p>Para íconos PNG en iOS (apple-touch-icon), se recomienda generar variantes PNG de 192×192 y 512×512 a partir del SVG antes del deploy. Herramientas: <strong>Squoosh</strong>, <strong>PWA Builder</strong>, o <code>sharp</code> via Node script.</p>
+    </div>
+  </section>
+
+  <!-- ── 12 Producción ── -->
+  <section id="production">
+    <h2>12 <span class="accent">Cambios Necesarios para Producción</span></h2>
+
+    <h3>1. Variables de entorno Angular</h3>
+    <p>Editar <code>src/environments/environment.prod.ts</code>:</p>
+<pre><code><span class="kw">export const</span> environment = {
+  <span class="fn">production</span>:   <span class="kw">true</span>,
+  <span class="fn">useLocalDb</span>:   <span class="kw">false</span>,             <span class="cmt">// obligatorio</span>
+  <span class="fn">supabaseUrl</span>:  <span class="str">'https://TU-ID.supabase.co'</span>,
+  <span class="fn">supabaseAnonKey</span>: <span class="str">'eyJhbGciOiJIUzI1NiIsInR5cCI6...'</span>,
+};</code></pre>
+
+    <h3>2. Checklist completo de producción</h3>
+    <ul class="checklist">
+      <li class="todo">Crear proyecto en <a href="https://supabase.com">supabase.com</a> y obtener URL + Anon Key</li>
+      <li class="todo">Rellenar <code>environment.prod.ts</code> con las credenciales reales</li>
+      <li class="todo">Ejecutar las 6 migraciones en el SQL Editor de Supabase (en orden)</li>
+      <li class="todo">Verificar que RLS está habilitado en todas las tablas (<em>ver Supabase → Table Editor → RLS</em>)</li>
+      <li class="todo">Crear bucket de Storage: <code>fotos</code> con política pública de lectura</li>
+      <li class="todo">Configurar Google OAuth en <em>Supabase → Authentication → Providers → Google</em></li>
+      <li class="todo">Agregar Redirect URL en Supabase: <code>https://TU-DOMINIO.vercel.app/auth/callback</code></li>
+      <li class="todo">Agregar Authorized origin en Google Cloud Console: <code>https://TU-DOMINIO.vercel.app</code></li>
+      <li class="todo">Generar íconos PNG (192×192, 512×512) y actualizar <code>manifest.webmanifest</code></li>
+      <li class="todo">Ejecutar <code>ng build --configuration production</code> y verificar que no hay errores de presupuesto</li>
+      <li class="todo">Conectar repositorio GitHub con Vercel</li>
+      <li class="todo">Configurar en Vercel: <em>Framework: Angular</em>, <em>Build command:</em> <code>ng build</code>, <em>Output dir:</em> <code>dist/appfc/browser</code></li>
+      <li class="todo">Verificar HTTPS (Vercel lo provee automáticamente)</li>
+      <li class="todo">Probar PWA: Chrome DevTools → Application → Manifest + Service Workers</li>
+      <li class="todo">Probar "Agregar a pantalla de inicio" en Android e iOS</li>
+    </ul>
+
+    <h3>3. Configuración de Storage (bucket <code>fotos</code>)</h3>
+    <p>El bucket debe tener una política de lectura pública. Ejecutar en el SQL Editor:</p>
+<pre><code><span class="kw">INSERT INTO</span> storage.buckets (<span class="fn">id</span>, <span class="fn">name</span>, <span class="fn">public</span>)
+<span class="kw">VALUES</span> (<span class="str">'fotos'</span>, <span class="str">'fotos'</span>, <span class="kw">true</span>)
+<span class="kw">ON CONFLICT</span> (<span class="fn">id</span>) <span class="kw">DO NOTHING</span>;
+
+<span class="kw">CREATE POLICY</span> <span class="str">"Public read fotos"</span>
+  <span class="kw">ON</span> storage.objects <span class="kw">FOR SELECT USING</span> (bucket_id = <span class="str">'fotos'</span>);
+
+<span class="kw">CREATE POLICY</span> <span class="str">"Auth upload fotos"</span>
+  <span class="kw">ON</span> storage.objects <span class="kw">FOR INSERT TO</span> authenticated
+  <span class="kw">WITH CHECK</span> (bucket_id = <span class="str">'fotos'</span>);</code></pre>
+
+    <h3>4. Verificar trigger de signup</h3>
+    <p>Confirmar que el trigger <code>on_auth_user_created</code> existe. Si no, ejecutar:</p>
+<pre><code><span class="kw">CREATE OR REPLACE FUNCTION</span> public.handle_new_user()
+<span class="kw">RETURNS TRIGGER LANGUAGE</span> plpgsql <span class="kw">SECURITY DEFINER AS</span> <span class="str">$$</span>
+<span class="kw">BEGIN</span>
+  <span class="kw">INSERT INTO</span> public.usuarios (<span class="fn">id</span>, nombre, rep_asistencia, rep_puntualidad, rep_compromiso, created_at)
+  <span class="kw">VALUES</span> (<span class="fn">NEW</span>.id, <span class="str">''</span>, <span class="num">50</span>, <span class="num">50</span>, <span class="num">50</span>, <span class="fn">now</span>());
+  <span class="kw">RETURN NEW</span>;
+<span class="kw">END</span>;
+<span class="str">$$</span>;
+
+<span class="kw">CREATE OR REPLACE TRIGGER</span> on_auth_user_created
+  <span class="kw">AFTER INSERT ON</span> auth.users
+  <span class="kw">FOR EACH ROW EXECUTE FUNCTION</span> public.handle_new_user();</code></pre>
+  </section>
+
+  <!-- ── 13 Guía Supabase ── -->
+  <section id="supabase-guide">
+    <h2>13 <span class="accent">Guía Supabase — Paso a Paso</span></h2>
+
+    <h3>Crear proyecto</h3>
+    <ol class="steps">
+      <li>Ingresar a <strong>supabase.com</strong> → <em>New Project</em>.</li>
+      <li>Elegir organización, nombre del proyecto (<code>appfc</code>), contraseña de BD y región más cercana a Chile (<strong>São Paulo</strong> o <strong>US East</strong>).</li>
+      <li>Esperar ~2 minutos a que el proyecto se inicialice.</li>
+      <li>Ir a <em>Project Settings → API</em> y copiar: <br/>
+        • <strong>Project URL</strong> → <code>environment.supabaseUrl</code><br/>
+        • <strong>anon public</strong> key → <code>environment.supabaseAnonKey</code></li>
+    </ol>
+
+    <h3>Ejecutar migraciones</h3>
+    <ol class="steps">
+      <li>En Supabase, ir a <em>SQL Editor → New query</em>.</li>
+      <li>Copiar y ejecutar el contenido de <code>20260407_etapa2_usuarios.sql</code>. Verificar que no hay errores.</li>
+      <li>Repetir para cada migración en orden cronológico. <strong>No saltar ninguna</strong>: cada migración asume que las anteriores ya existen.</li>
+      <li>Verificar en <em>Table Editor</em> que las 8 tablas aparecen: <code>usuarios</code>, <code>equipos</code>, <code>equipo_miembros</code>, <code>partidos</code>, <code>partido_jugadores</code>, <code>partido_solicitudes</code>, <code>notificaciones</code>.</li>
+      <li>Verificar en cada tabla que <em>Row Level Security</em> está habilitado (ícono de candado).</li>
+    </ol>
+
+    <h3>Configurar Google OAuth</h3>
+    <ol class="steps">
+      <li>Ir a <a href="https://console.cloud.google.com">console.cloud.google.com</a> → <em>APIs & Services → OAuth consent screen</em> → Crear app (tipo Externo).</li>
+      <li>Ir a <em>Credentials → Create Credentials → OAuth Client ID</em> → Tipo: <em>Web Application</em>.</li>
+      <li>Agregar en <em>Authorized JavaScript origins</em>: <code>https://TU-PROYECTO.supabase.co</code> y tu dominio de producción.</li>
+      <li>Agregar en <em>Authorized redirect URIs</em>: <code>https://TU-PROYECTO.supabase.co/auth/v1/callback</code>.</li>
+      <li>Copiar el <strong>Client ID</strong> y <strong>Client Secret</strong>.</li>
+      <li>En Supabase → <em>Authentication → Providers → Google</em> → pegar Client ID y Client Secret → <em>Save</em>.</li>
+      <li>En Supabase → <em>Authentication → URL Configuration</em> → agregar a <em>Redirect URLs</em>: <code>https://TU-DOMINIO.com/auth/callback</code>.</li>
+    </ol>
+
+    <h3>Configurar Storage</h3>
+    <ol class="steps">
+      <li>Ir a <em>Storage → New Bucket</em> → nombre: <code>fotos</code> → marcar <em>Public bucket</em> → <em>Create bucket</em>.</li>
+      <li>En el bucket <code>fotos</code>, ir a <em>Policies → New Policy</em>.</li>
+      <li>Crear política <code>SELECT</code> para <em>Everyone</em> (lectura pública de fotos).</li>
+      <li>Crear política <code>INSERT</code> para <em>Authenticated users</em> (solo usuarios logueados pueden subir).</li>
+    </ol>
+
+    <h3>Activar modo Supabase en desarrollo</h3>
+    <ol class="steps">
+      <li>Editar <code>src/environments/environment.ts</code>:
+<pre><code>  <span class="fn">useLocalDb</span>: <span class="kw">false</span>,
+  <span class="fn">supabaseUrl</span>: <span class="str">'https://xxxx.supabase.co'</span>,
+  <span class="fn">supabaseAnonKey</span>: <span class="str">'eyJ...'</span>,</code></pre>
+      </li>
+      <li>Ejecutar <code>ng serve</code>. La app ahora habla con Supabase real.</li>
+      <li>Registrarse con email/contraseña (la primera cuenta deberá confirmar email, a menos que deshabilites email confirmation en <em>Authentication → Settings</em>).</li>
+      <li>Para deshabilitar confirmación de email en desarrollo: <em>Supabase → Authentication → Settings → Enable email confirmations → OFF</em>.</li>
+    </ol>
+
+    <h3>Usar Supabase CLI (opcional, para migraciones automáticas)</h3>
+    <ol class="steps">
+      <li>Instalar CLI: <code>npm install -g supabase</code></li>
+      <li>Login: <code>supabase login</code></li>
+      <li>Inicializar en el proyecto: <code>supabase init</code> (ya existe <code>supabase/</code>)</li>
+      <li>Enlazar con el proyecto remoto: <code>supabase link --project-ref TU_PROJECT_REF</code></li>
+      <li>Subir migraciones: <code>supabase db push</code></li>
+      <li>Ver estado: <code>supabase db remote changes</code></li>
+    </ol>
+
+    <h3>Seed de datos de prueba (opcional)</h3>
+    <p>El archivo <code>supabase/seeds/seed_jugadores.sql</code> crea dos equipos completos (Los Barrabases y La Roja 2015) con jugadores y credenciales de acceso.</p>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <p>El seed usa <code>crypt(password, gen_salt('bf',10))</code> para hashear contraseñas directamente en <code>auth.users</code>. <strong>Solo para desarrollo</strong>. Ejecutar en <em>SQL Editor</em> con permisos de <code>service_role</code>.</p>
+    </div>
+
+    <div class="table-wrap" style="margin-top:1rem"><table>
+      <thead><tr><th>Cuenta</th><th>Email</th><th>Contraseña</th><th>Equipo</th></tr></thead>
+      <tbody>
+        <tr><td>Capitán local</td><td><code>camotillo@barrabases.cl</code></td><td><code>barrabases</code></td><td>Los Barrabases</td></tr>
+        <tr><td>Capitán visitante</td><td><code>claudio.bravo@laroja.cl</code></td><td><code>laroja2015</code></td><td>La Roja 2015</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Verificar RLS en producción</h3>
+    <p>Para confirmar que un usuario solo ve sus propios datos, usar el cliente de Supabase con el JWT del usuario. En <em>SQL Editor</em>, ejecutar queries "as user" con:</p>
+<pre><code><span class="cmt">-- Simular un usuario específico en SQL Editor</span>
+<span class="kw">SET</span> request.jwt.claims = <span class="str">'{"sub":"UUID-DEL-USUARIO","role":"authenticated"}'</span>;
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> public.notificaciones; <span class="cmt">-- Solo debe ver las propias</span></code></pre>
+
+    <div class="callout callout-ok" style="margin-top:2rem">
+      <span class="callout-icon">✅</span>
+      <p><strong>Todo listo:</strong> Con las migraciones ejecutadas, el bucket creado, Google OAuth configurado y las variables de entorno actualizadas, la app está lista para deploy en Vercel con <code>ng build --configuration production</code>.</p>
+    </div>
+  </section>
+
+  <footer style="border-top: 1px solid var(--border); padding: 2rem 0; margin-top: 2rem; font-size: .75rem; color: rgba(255,255,255,.3);">
+    AppFC — Documentación Técnica · Generada el 11 de abril de 2026 · Stack: Angular 21 + Supabase + Tailwind CSS v4
+  </footer>
+
+</main>
+</body>
+</html>

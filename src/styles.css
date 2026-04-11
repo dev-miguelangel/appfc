@@ -38,6 +38,27 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* ── Responsive base ─────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+input, button, select, textarea {
+  font-family: inherit;
+}
+
+/* Safe area padding helpers */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* ── Clip-path helpers ───────────────────────────── */
 .clip-skew {
   clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);

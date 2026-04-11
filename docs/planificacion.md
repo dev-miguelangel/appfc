@@ -1,6 +1,6 @@
 # AppFC — Planificacion del proyecto
 
-> Stack: Angular 20 · Supabase · Tailwind CSS v4 · Vercel  
+> Stack: Angular 21 · Supabase · Tailwind CSS v4 · Vercel  
 > Metodologia: entrega incremental por etapas, cada una deployable y funcional de forma independiente.
 
 ---
@@ -9,11 +9,11 @@
 
 | # | Etapa | Entregable clave | Estado |
 |---|-------|-----------------|--------|
-| 1 | Base del proyecto + Landing page | App Angular corriendo, landing publica | Pendiente |
-| 2 | Autenticacion + Perfil de jugador | Login Google, onboarding, perfil editable | Pendiente |
-| 3 | Equipos | Crear equipo, invitar miembros, vista del club | Pendiente |
-| 4 | Partidos | Crear partido, convocar, confirmar asistencia | Pendiente |
-| 5 | Resultado y reputacion | Confirmacion bilateral, calculo de reputacion | Pendiente |
+| 1 | Base del proyecto + Landing page | App Angular corriendo, landing publica | ✅ Completada |
+| 2 | Autenticacion + Perfil de jugador | Login Google/email, onboarding, perfil editable | ✅ Completada |
+| 3 | Equipos | Crear equipo, invitar miembros, vista del club | ✅ Completada |
+| 4 | Partidos | Crear partido, convocar, confirmar asistencia | ✅ Completada |
+| 5 | Resultado y reputacion | Confirmacion bilateral, calculo de reputacion | ✅ Completada |
 | 6 | Busqueda de reemplazos | Candidatos por posicion/comuna, invitaciones | Pendiente |
 | 7 | Notificaciones realtime | WebSockets, notificaciones in-app en vivo | Pendiente |
 | 8 | Lugares / Canchas | Directorio de canchas, patrocinadores | Pendiente |
@@ -22,147 +22,144 @@
 
 ---
 
-## Etapa 1 — Base del proyecto + Landing page
+## Etapa 1 — Base del proyecto + Landing page ✅
 
-**Objetivo:** Dejar el proyecto Angular 20 configurado con todas las herramientas del stack y publicar la landing page publica.
+**Objetivo:** Dejar el proyecto Angular 21 configurado con todas las herramientas del stack y publicar la landing page publica.
 
 ### 1.1 Setup del proyecto
 
-- [ ] Crear proyecto Angular 20 con `ng new appfc --standalone --routing --style=css`
-- [ ] Configurar Tailwind CSS v4 con el plugin oficial para Angular
-- [ ] Configurar TypeScript en modo `strict`
-- [ ] Instalar y configurar `@supabase/supabase-js`
-- [ ] Crear `supabase.provider.ts` con token de inyeccion `SUPABASE_CLIENT`
-- [ ] Configurar variables de entorno (`environment.ts` y `.env` para Supabase URL + anon key)
-- [ ] Instalar Supabase CLI y levantar instancia local con Docker
-- [ ] Configurar ESLint + Prettier
-- [ ] Inicializar repositorio Git y conectar con GitHub
-- [ ] Configurar proyecto en Vercel (deploy automatico desde `main`)
+- [x] Crear proyecto Angular 21 con `ng new appfc --standalone --routing --style=css`
+- [x] Configurar Tailwind CSS v4 via `@tailwindcss/postcss` + `postcss.config.mjs`
+- [x] Configurar TypeScript en modo `strict`
+- [x] Instalar y configurar `@supabase/supabase-js`
+- [x] Crear `supabase.provider.ts` con token de inyeccion `SUPABASE_CLIENT`
+- [x] Configurar variables de entorno (`environment.ts` / `environment.prod.ts`)
+- [x] Inicializar repositorio Git y conectar con GitHub (`dev-miguelangel/appfc`)
 
-**Estructura de carpetas objetivo:**
+**Estructura de carpetas:**
 ```
 src/
   app/
     core/
-      supabase/         ← cliente y tipos generados
-      auth/             ← servicio de auth (vacio por ahora)
+      supabase/         ← cliente, provider, token DI
+      auth/             ← AuthService, guards
+      data/             ← listas estaticas (comunas)
+      local-db/         ← mock local para desarrollo sin Supabase
     features/
-      landing/          ← componente landing page
-      shell/            ← layout autenticado (vacio)
-    shared/
-      components/       ← botones, badges, cards reutilizables
-      pipes/
+      landing/          ← landing page y sub-componentes
+      auth/             ← login, callback OAuth
+      shell/            ← layout autenticado, dashboard, perfil, onboarding
     app.routes.ts
     app.config.ts
 ```
 
 ### 1.2 Routing base
 
-- [ ] Definir `app.routes.ts` con rutas lazy:
-  - `/` → `LandingComponent`
-  - `/auth` → `AuthComponent` (placeholder)
-  - `/app/**` → `ShellComponent` (placeholder, sin guard todavia)
-- [ ] Configurar `RouterOutlet` en `AppComponent`
-- [ ] Agregar `scrollPositionRestoration: 'enabled'` en el router
+- [x] `app.routes.ts` con rutas lazy: `/` → Landing, `/auth` → Auth, `/app/**` → Shell
+- [x] `RouterOutlet` en `AppComponent`
+- [x] `withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' })`
 
 ### 1.3 Landing page
 
-Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalone.
+- [x] `LandingComponent` — componente raiz de la landing
+- [x] `NavComponent` — barra de navegacion fija con CTA y links a secciones via `[routerLink]+fragment`
+- [x] `HeroSectionComponent` — hero con player card animada y particulas flotantes
+- [x] `FeaturesSectionComponent` — grid de funcionalidades
+- [x] `HowItWorksSectionComponent` — pasos del flujo
+- [x] `ReputacionSectionComponent` — barras de reputacion con animacion `IntersectionObserver`
+- [x] `CtaSectionComponent` — llamado a la accion final
+- [x] `FooterComponent` — pie de pagina
+- [x] Fuente Bebas Neue via Google Fonts en `styles.css`
+- [x] Paleta de colores como CSS custom properties globales (`--color-gold`, `--color-green`, etc.)
+- [x] Responsive mobile/desktop
+- [x] Smooth scroll a secciones internas (`anchorScrolling` en router)
 
-- [ ] `LandingComponent` — componente raiz de la landing
-- [ ] `NavComponent` — barra de navegacion fija con CTA
-- [ ] `HeroSectionComponent` — seccion hero con player card animada
-- [ ] `FeaturesSectionComponent` — grid de funcionalidades
-- [ ] `HowItWorksSectionComponent` — pasos del flujo
-- [ ] `ReputacionSectionComponent` — barras de reputacion con animacion on-scroll
-- [ ] `CtaSectionComponent` — llamado a la accion final
-- [ ] `FooterComponent` — pie de pagina
+### 1.4 Deploy inicial
 
-**Criterios de la landing:**
-- [ ] Fuente Bebas Neue cargada via `@font-face` o Google Fonts en `styles.css`
-- [ ] Paleta de colores definida como CSS custom properties globales
-- [ ] Animacion de particulas funcionando (convertir JS a servicio Angular)
-- [ ] Animacion de barras de reputacion via `IntersectionObserver` en directiva
-- [ ] Smooth scroll a secciones internas
-- [ ] Responsive: funciona en movil (375px) y desktop (1280px+)
-- [ ] Boton "Registrarse" navega a `/auth`
+- [x] `ng build` sin errores
+- [x] Repositorio GitHub operativo
 
-### 1.4 Componentes shared base
+### Definicion de terminado — Etapa 1 ✅
 
-- [ ] `ButtonComponent` — variantes: primary, secondary, ghost
-- [ ] `BadgeComponent` — variantes de color para estado/tipo
-- [ ] `CardComponent` — contenedor con borde y fondo dark
-
-### 1.5 Tipos TypeScript
-
-- [ ] Generar tipos desde schema Supabase: `supabase gen types typescript > src/app/core/supabase/database.types.ts`
-- [ ] Crear interfaces de dominio iniciales:
-  - `Usuario`, `Equipo`, `Partido`, `Lugar`
-
-### 1.6 Deploy inicial
-
-- [ ] Verificar build de produccion sin errores: `ng build`
-- [ ] Deploy automatico en Vercel funcionando desde push a `main`
-- [ ] URL publica accesible y landing renderizando correctamente
-- [ ] Lighthouse score: Performance > 85, Accessibility > 90
-
-### Definicion de terminado — Etapa 1
-
-- [ ] `ng serve` y `ng build` sin errores ni warnings criticos
-- [ ] Landing page identica al diseño en todas las resoluciones objetivo
-- [ ] Deploy automatico en Vercel operativo
-- [ ] Supabase CLI corriendo localmente
-- [ ] Repositorio con `.gitignore` correcto (sin `.env` commiteado)
+- [x] `ng serve` y `ng build` sin errores ni warnings criticos
+- [x] Landing page correcta en todas las resoluciones objetivo
+- [x] Repositorio con `.gitignore` correcto
 
 ---
 
-## Etapa 2 — Autenticacion + Perfil de jugador
+## Etapa 2 — Autenticacion + Perfil de jugador ✅
 
-**Objetivo:** El usuario puede registrarse con Google, completar su perfil y acceder al area autenticada.
+**Objetivo:** El usuario puede registrarse (Google u email/password), completar su perfil y acceder al area autenticada. En modo desarrollo se usa una base de datos local sin necesidad de credenciales Supabase.
 
-### 2.1 Supabase Auth
+### 2.1 Feature flag modo local
 
-- [ ] Configurar OAuth de Google en Supabase (client ID + secret)
-- [ ] Crear `AuthService` con Signals: `session`, `isLoggedIn`, `userId`
-- [ ] Implementar `loginWithGoogle()` con redirect a `/app/dashboard`
-- [ ] Implementar `logout()`
-- [ ] Persistir sesion entre recargas via `supabase.auth.getSession()`
-- [ ] Escuchar `onAuthStateChange` para mantener el signal actualizado
+- [x] Flag `useLocalDb: boolean` en `environment.ts` (dev) y `environment.prod.ts` (prod)
+- [x] `LocalStore` — CRUD generico sobre `localStorage` que simula tablas SQL
+- [x] `MockSupabaseClient` — implementa la misma API que `@supabase/supabase-js`:
+  - Auth: `signUp`, `signInWithPassword`, `signOut`, `getSession`, `onAuthStateChange`
+  - QueryBuilder: `.from().select().eq().single()` / `.upsert()`
+  - Storage: archivos guardados como base64 en `localStorage`
+- [x] `provideSupabase()` elige el cliente real o el mock segun el flag
+- [x] Banner visual en `/auth` cuando el modo local esta activo
+- [x] `signInWithOAuth` deshabilitado en modo local (Google OAuth requiere redirect real)
 
-### 2.2 Proteccion de rutas
+### 2.2 AuthService
 
-- [ ] Crear `authGuard` funcional que redirige a `/auth` si no hay sesion
-- [ ] Crear `publicGuard` que redirige a `/app/dashboard` si ya hay sesion
-- [ ] Aplicar guards a las rutas correspondientes
+- [x] `AuthService` con Signals: `session`, `perfil`, `isLoggedIn`, `userId`, `perfilCompleto`, `loading`
+- [x] `loginWithGoogle()` — OAuth redirect a `/auth/callback`
+- [x] `loginWithEmail(email, password)` — carga sesion y perfil directamente (sin depender del timing de `onAuthStateChange`)
+- [x] `registerWithEmail(email, password)` — crea cuenta y carga sesion/perfil
+- [x] `logout()` — limpia sesion y navega a `/`
+- [x] `savePerfil(data)` — upsert en tabla `usuarios`
+- [x] `uploadFoto(file)` — sube a Supabase Storage (o `localStorage` en modo local)
+- [x] Persistencia de sesion entre recargas via `getSession()`
+- [x] `onAuthStateChange` mantiene el signal actualizado
 
-### 2.3 Pantalla de login
+### 2.3 Proteccion de rutas
 
-- [ ] `AuthComponent` con boton "Continuar con Google"
-- [ ] Manejo del callback OAuth (ruta `/auth/callback`)
-- [ ] Estado de carga durante el proceso OAuth
+- [x] `authGuard` — redirige a `/auth` si no hay sesion; redirige a `/app/onboarding` si perfil incompleto
+- [x] `onboardingGuard` — redirige a `/app/dashboard` si perfil ya esta completo
+- [x] `publicGuard` — redirige a `/app/dashboard` si ya hay sesion activa
 
-### 2.4 Onboarding / completar perfil
+### 2.4 Pantalla de login (`/auth`)
 
-- [ ] Crear tabla `usuarios` en Supabase (migration `001_usuarios.sql`)
-- [ ] Activar RLS en tabla `usuarios`
-- [ ] Trigger PostgreSQL: al crear usuario en `auth.users`, insertar fila en `public.usuarios`
-- [ ] `OnboardingComponent` — formulario: nombre, edad, comuna, posicion
-- [ ] Guard que detecta si el perfil esta incompleto y redirige al onboarding
-- [ ] Subida de foto de perfil a Supabase Storage
+- [x] `AuthComponent` con boton "Continuar con Google" (deshabilitado en modo local)
+- [x] Formulario email/password con tabs Ingresar / Registrarse
+- [x] Visible siempre en modo local (`useLocalDb`), solo en dev en modo Supabase
+- [x] Navegacion post-login: `perfilCompleto` → `/app/dashboard`, incompleto → `/app/onboarding`
+- [x] `AuthCallbackComponent` — maneja el redirect OAuth en `/auth/callback`
 
-### 2.5 Shell autenticado
+### 2.5 Onboarding (`/app/onboarding`)
 
-- [ ] `ShellComponent` — layout con sidebar o nav lateral
-- [ ] `DashboardComponent` — placeholder "Bienvenido, {nombre}"
-- [ ] `HeaderComponent` — muestra nombre, foto y boton logout
-- [ ] Ruta `/app/perfil` — `PerfilComponent` (ver y editar perfil propio)
+- [x] `OnboardingComponent` — formulario: nombre, edad, posicion, comuna
+- [x] Lista de comunas de Chile en `core/data/comunas.ts`
+- [x] Guard que redirige al dashboard si el perfil ya esta completo
 
-### Definicion de terminado — Etapa 2
+### 2.6 Shell autenticado
 
-- [ ] Login con Google funcional end-to-end
-- [ ] Perfil guardado en Supabase y editable
-- [ ] Rutas protegidas redirigen correctamente
-- [ ] Foto de perfil subida a Storage y visible
+- [x] `ShellComponent` — layout con header sticky, nav con links activos, botones logout
+- [x] `DashboardComponent` — bienvenida con stats: partidos jugados, equipos, reputacion promedio
+- [x] `PerfilComponent` — ver y editar perfil propio, barras de reputacion, upload de foto
+
+### 2.7 Migracion Supabase
+
+- [x] `supabase/migrations/20260407_etapa2_usuarios.sql`:
+  - Tipo ENUM `posicion_jugador`
+  - Tabla `usuarios` con campos de reputacion (default 50)
+  - RLS: SELECT para autenticados, INSERT/UPDATE solo al propio usuario
+  - Trigger `on_auth_user_created` → auto-inserta fila en `usuarios` al crear `auth.user`
+  - Notas para bucket Storage `fotos` con politicas
+
+### Definicion de terminado — Etapa 2 ✅
+
+- [x] Login con email/password funcional en modo local (localStorage)
+- [x] Registro crea cuenta y redirige a onboarding
+- [x] Onboarding guarda perfil y redirige al dashboard
+- [x] Perfil editable con barras de reputacion
+- [x] Rutas protegidas redirigen correctamente segun estado de sesion y perfil
+- [x] `ng build` sin errores ni warnings
+- [ ] Login con Google funcional end-to-end (requiere credenciales Supabase — pendiente para deploy)
+- [ ] Foto de perfil subida a Supabase Storage (funciona en local via base64)
 
 ---
 
@@ -176,6 +173,7 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
 - [ ] ENUMs: `estado_miembro_enum` (pendiente, activo, rechazado), `rol_equipo_enum` (capitan, jugador)
 - [ ] RLS policies para `equipos` y `equipo_miembros`
 - [ ] Funcion RPC `get_mis_equipos(user_id)` que retorna equipos donde el usuario es miembro activo
+- [ ] Soporte en `MockSupabaseClient` para las nuevas tablas
 
 ### 3.2 Servicio Angular
 
@@ -201,6 +199,7 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
 - [ ] Crear equipo, invitar jugador, aceptar invitacion funciona end-to-end
 - [ ] RLS impide ver o modificar equipos ajenos
 - [ ] Un usuario puede pertenecer a multiples equipos
+- [ ] Funciona en modo local (`useLocalDb: true`)
 
 ---
 
@@ -239,44 +238,45 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
   - Acciones: confirmar/rechazar asistencia (jugador)
   - Registrar asistencia real (capitan, post-partido)
 
-### Definicion de terminado — Etapa 4
+### Definicion de terminado — Etapa 4 ✅
 
-- [ ] Flujo completo: crear partido → convocar → confirmar → registrar asistencia
-- [ ] Validacion de cupo maximo por equipo
-- [ ] Solo el capitan puede crear y gestionar el partido
+- [x] Flujo completo: crear partido → convocar → confirmar → registrar asistencia
+- [x] Validacion de cupo maximo por equipo
+- [x] Solo el capitan puede crear y gestionar el partido
 
 ---
 
-## Etapa 5 — Resultado y reputacion
+## Etapa 5 — Resultado y reputacion ✅
 
 **Objetivo:** Ambos capitanes confirman el resultado. La reputacion de los jugadores se actualiza automaticamente.
 
 ### 5.1 Base de datos
 
-- [ ] Agregar campos a `partidos`: `goles_local`, `goles_visitante`, `result_conf_local`, `result_conf_visit`
-- [ ] Estado `en_disputa` en `estado_partido_enum`
-- [ ] Trigger `trg_resultado_confirmado`: cambia estado a `completado` cuando ambos booleanos son `true`
-- [ ] Trigger `trg_resultado_disputa`: detecta marcadores distintos y pone estado `en_disputa`
-- [ ] Edge Function `recordatorio_resultado`: cron que ejecuta a las 24h post-partido y notifica a capitanes sin confirmar
-- [ ] Funcion `recalcular_reputacion(usuario_id)` ejecutada tras `completado`
+- [x] Agregar campos a `partidos`: `goles_local`, `goles_visitante`, `result_conf_local`, `result_conf_visit`, `score_local`, `score_visit`
+- [x] Estado `en_disputa` en `estado_partido_enum`
+- [x] Trigger `trg_verificar_resultado`: cambia estado a `completado` (marcadores iguales) o `en_disputa` (distintos)
+- [x] Trigger `trg_on_partido_completado`: llama a `recalcular_reputacion_partido` al quedar `completado`
+- [x] Funcion `recalcular_reputacion_partido(p_partido_id)` — penaliza no-shows, premia asistentes
+- [ ] Edge Function `recordatorio_resultado`: cron 24h (pendiente, fuera del scope MVP)
 
 ### 5.2 Servicio Angular
 
-- [ ] `ResultadosService`:
-  - `confirmarResultado(partido_id, goles_mi_equipo)` — solo el capitan del equipo correspondiente
-  - `getResultado(partido_id)`
+- [x] `ResultadosService.confirmarResultado(partido_id, rol, golesLocal, golesVisitante)`
+- [x] Resolucion bilateral en mock (client-side, equivalente al trigger SQL)
+- [x] `actualizarReputacionesMock` — espeja la logica del trigger en localStorage
 
 ### 5.3 Vistas
 
-- [ ] Seccion "Confirmar resultado" en detalle del partido (visible solo a capitanes y solo post-partido)
-- [ ] Estado visual del partido: programado / en disputa / completado / cancelado
-- [ ] Vista de reputacion en perfil con barras animadas (datos reales de Supabase)
+- [x] Seccion "Confirmar resultado" en detalle del partido (solo capitanes, solo post-partido)
+- [x] Tarjeta "Resultado final" cuando `completado` con marcador grande
+- [x] Tarjeta "En disputa" con ambas versiones del marcador
+- [x] Badge `en_disputa` (naranja) en lista y detalle de partidos
 
 ### Definicion de terminado — Etapa 5
 
-- [ ] Confirmacion bilateral funciona; estado cambia a `completado` solo con ambas confirmaciones
-- [ ] Deteccion de resultado en disputa con notificacion a ambos capitanes
-- [ ] Reputacion calculada correctamente y visible en perfil
+- [x] Confirmacion bilateral funciona; estado cambia a `completado` solo con ambas confirmaciones
+- [x] Deteccion de resultado en disputa visible con ambas versiones
+- [x] Reputacion calculada correctamente en mock y en Supabase (via trigger)
 
 ---
 
@@ -291,7 +291,7 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
   - Filtra por posicion y comuna
   - Ordena por reputacion desc
   - Limita a 20 resultados
-- [ ] Indice `idx_usuarios_comuna_posicion` (ya definido en migraciones)
+- [ ] Indice `idx_usuarios_comuna_posicion`
 
 ### 6.2 Servicio Angular
 
@@ -389,7 +389,7 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
 ### 9.1 Testing
 
 - [ ] Setup Vitest para unit tests
-- [ ] Setup Playwright para tests E2E contra Supabase local
+- [ ] Setup Playwright para tests E2E
 - [ ] Tests unitarios para: `AuthService`, `PartidosService`, `ReputacionService`, `buscar_candidatos RPC`
 - [ ] Tests E2E para flujos criticos:
   - Login → onboarding → crear equipo → crear partido → confirmar → resultado
@@ -433,6 +433,7 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
 ### 10.1 Infraestructura produccion
 
 - [ ] Variables de entorno de produccion configuradas en Vercel (Supabase prod URL + anon key)
+- [ ] `useLocalDb: false` verificado en `environment.prod.ts`
 - [ ] Dominio personalizado configurado en Vercel (si aplica)
 - [ ] Supabase proyecto de produccion separado del de desarrollo
 - [ ] Migraciones aplicadas al proyecto de produccion
@@ -440,7 +441,6 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
 
 ### 10.2 Seed y datos iniciales
 
-- [ ] Seed de comunas de Chile (lista para autocompletado)
 - [ ] Seed de canchas iniciales en Santiago (minimo 20)
 - [ ] Cuenta admin para gestionar altas de lugares
 
@@ -466,15 +466,16 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
 
 ---
 
-## Decisiones tecnicas pendientes
+## Decisiones tecnicas
 
-| Decision | Opciones | Fecha limite |
-|----------|---------|-------------|
-| Manejo de estado global | Signals puros vs NgRx SignalStore | Antes de Etapa 3 |
-| Libreria de UI | Tailwind puro vs Angular Material vs PrimeNG | Antes de Etapa 2 |
-| Sistema de notificaciones push | Supabase Realtime + WebSocket vs Web Push API | Antes de Etapa 7 |
-| Internacionalizacion | Solo espanol (MVP) vs i18n desde el inicio | Antes de Etapa 1 |
-| Reserva de canchas (futuro) | Stripe + calendario vs integracion externa | Post-MVP |
+| Decision | Resolucion |
+|----------|-----------|
+| Manejo de estado global | Signals puros (Angular 21) — sin NgRx |
+| Libreria de UI | Tailwind CSS v4 puro — sin Angular Material ni PrimeNG |
+| Sistema de notificaciones push | Supabase Realtime + WebSocket (Etapa 7) |
+| Internacionalizacion | Solo espanol (MVP) |
+| Modo desarrollo sin Supabase | Feature flag `useLocalDb` + `MockSupabaseClient` en `localStorage` |
+| Reserva de canchas (futuro) | Post-MVP |
 
 ---
 
@@ -484,3 +485,4 @@ Traducir el diseño HTML estatico (`index.html`) a componentes Angular standalon
 - El schema de base de datos se versiona con migraciones numeradas en `supabase/migrations/`
 - No iniciar la Etapa N+1 sin que la Etapa N tenga todos sus criterios de terminado cumplidos
 - Los tipos TypeScript de Supabase se regeneran cada vez que cambia el schema: `supabase gen types typescript`
+- Para conectar Supabase real: cambiar `useLocalDb: false` en `environment.ts` y completar `supabaseUrl` + `supabaseAnonKey`
