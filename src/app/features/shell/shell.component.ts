@@ -1,5 +1,6 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { SwUpdate, VersionReadyEvent } from '@angular/service-worker';
 import { AuthService } from '../../core/auth/auth.service';
 import { NotificacionesService } from '../../core/notificaciones/notificaciones.service';
 import { Notificacion } from '../../core/models/notificacion.model';
@@ -109,6 +110,34 @@ import { Notificacion } from '../../core/models/notificacion.model';
           </button>
         </div>
       </header>
+
+      <!-- ── Banner de actualización ── -->
+      @if (hayActualizacion()) {
+        <div class="update-banner">
+          <div class="update-banner-inner">
+            <div class="update-icon">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                <path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+              </svg>
+            </div>
+            <span class="update-text">
+              <strong>Nueva versión disponible</strong>
+              <span class="update-sub">Actualiza para obtener las últimas mejoras.</span>
+            </span>
+            <button class="btn-update" (click)="activarActualizacion()" [disabled]="actualizando()">
+              @if (actualizando()) {
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" class="spin">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                </svg>
+                Actualizando...
+              } @else {
+                Actualizar ahora
+              }
+            </button>
+          </div>
+        </div>
+      }
 
       <!-- ── Contenido ── -->
       <main class="shell-main">
@@ -260,6 +289,50 @@ import { Notificacion } from '../../core/models/notificacion.model';
       background: var(--color-gold); flex-shrink: 0; margin-top: .35rem;
     }
 
+    /* ── Banner de actualización ── */
+    .update-banner {
+      background: linear-gradient(90deg, rgba(240,192,64,.12) 0%, rgba(240,192,64,.06) 100%);
+      border-bottom: 1px solid rgba(240,192,64,.25);
+      padding: .6rem 2rem;
+      animation: slideDown .3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-100%); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .update-banner-inner {
+      display: flex; align-items: center; gap: .85rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .update-icon {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(240,192,64,.15); border: 1px solid rgba(240,192,64,.3);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--color-gold); flex-shrink: 0;
+    }
+    .update-text {
+      flex: 1; display: flex; flex-direction: column; gap: .1rem; min-width: 0;
+    }
+    .update-text strong {
+      font-size: .85rem; font-weight: 700; color: var(--color-gold);
+    }
+    .update-sub {
+      font-size: .75rem; color: rgba(255,255,255,.45);
+    }
+    .btn-update {
+      display: flex; align-items: center; gap: .4rem;
+      background: var(--color-gold);
+      color: var(--color-dark); border: none;
+      padding: .5rem 1.1rem; border-radius: 8px;
+      font-size: .8rem; font-weight: 800; letter-spacing: .06em;
+      text-transform: uppercase; cursor: pointer; white-space: nowrap;
+      transition: filter .2s, transform .1s; flex-shrink: 0;
+    }
+    .btn-update:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-update:disabled { opacity: .7; cursor: not-allowed; transform: none; }
+    .spin { animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* ── Main content ── */
     .shell-main {
       flex: 1; padding: 2rem;
@@ -285,6 +358,8 @@ import { Notificacion } from '../../core/models/notificacion.model';
        MOBILE  (≤ 640px)
     ════════════════════════════════════════ */
     @media (max-width: 640px) {
+      .update-banner { padding: .55rem 1rem; }
+      .update-sub    { display: none; }
       .shell-header { padding: 0 1rem; gap: .75rem; }
       .shell-nav    { display: none; }
 
@@ -320,17 +395,63 @@ import { Notificacion } from '../../core/models/notificacion.model';
     }
   `],
 })
-export class ShellComponent {
+export class ShellComponent implements OnDestroy {
   readonly auth  = inject(AuthService);
   readonly notif = inject(NotificacionesService);
   private router = inject(Router);
+  private swUpdate = inject(SwUpdate, { optional: true });
 
-  readonly mostrarNotif = signal(false);
+  readonly mostrarNotif     = signal(false);
+  readonly hayActualizacion = signal(false);
+  readonly actualizando     = signal(false);
+
+  private updateSub?: { unsubscribe(): void };
+  private checkInterval?: ReturnType<typeof setInterval>;
 
   constructor() {
     effect(() => {
       if (this.auth.userId()) void this.notif.cargarNotificaciones();
     });
+
+    this.initUpdateCheck();
+  }
+
+  private initUpdateCheck(): void {
+    const sw = this.swUpdate;
+    if (!sw?.isEnabled) return;
+
+    // Escuchar versión lista para activar
+    this.updateSub = sw.versionUpdates.subscribe(evt => {
+      if (evt.type === 'VERSION_READY') {
+        this.hayActualizacion.set(true);
+      }
+    });
+
+    // Verificar al recuperar foco de pestaña
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
+
+    // Verificar cada hora
+    this.checkInterval = setInterval(() => void sw.checkForUpdate(), 60 * 60 * 1000);
+  }
+
+  private onVisibilityChange = (): void => {
+    if (document.visibilityState === 'visible') {
+      void this.swUpdate?.checkForUpdate();
+    }
+  };
+
+  async activarActualizacion(): Promise<void> {
+    const sw = this.swUpdate;
+    if (!sw) return;
+    this.actualizando.set(true);
+    await sw.activateUpdate();
+    window.location.reload();
+  }
+
+  ngOnDestroy(): void {
+    this.updateSub?.unsubscribe();
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    if (this.checkInterval) clearInterval(this.checkInterval);
   }
 
   toggleNotif(): void {
