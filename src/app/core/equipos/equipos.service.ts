@@ -198,6 +198,17 @@ export class EquiposService {
     return url;
   }
 
+  // ─── Eliminar equipo ─────────────────────────────────────────────────────────
+
+  async eliminarEquipo(equipo_id: string): Promise<string | null> {
+    const { error } = await this.db
+      .from('equipos')
+      .delete()
+      .eq('id', equipo_id);
+    if (!error) await this.cargarMisEquipos();
+    return (error as { message: string } | null)?.message ?? null;
+  }
+
   // ─── Todos los equipos ───────────────────────────────────────────────────────
 
   async getAllEquipos(): Promise<Equipo[]> {

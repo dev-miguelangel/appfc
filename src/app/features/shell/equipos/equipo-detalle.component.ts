@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { EquiposService } from '../../../core/equipos/equipos.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -144,7 +144,39 @@ const POSICION_LABEL: Record<string, string> = {
               }
             </div>
           }
-        </div>
+        </div><!-- /miembros-section -->
+
+        <!-- Zona peligrosa (solo capitán) -->
+        @if (esCapitan()) {
+          <div class="danger-zone">
+            @if (!confirmandoEliminar()) {
+              <button class="btn-eliminar" (click)="confirmandoEliminar.set(true)">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                </svg>
+                Eliminar equipo
+              </button>
+            } @else {
+              <div class="confirm-panel">
+                <p class="confirm-msg">
+                  ¿Eliminar <strong>{{ equipo()!.nombre }}</strong>? Esta acción no se puede deshacer.
+                </p>
+                <div class="confirm-actions">
+                  <button class="btn-cancel-confirm" (click)="confirmandoEliminar.set(false)" [disabled]="eliminando()">
+                    Cancelar
+                  </button>
+                  <button class="btn-confirm-delete" (click)="eliminar()" [disabled]="eliminando()">
+                    {{ eliminando() ? 'Eliminando...' : 'Sí, eliminar' }}
+                  </button>
+                </div>
+                @if (errorEliminar()) {
+                  <p class="error-msg-sm">{{ errorEliminar() }}</p>
+                }
+              </div>
+            }
+          </div>
+        }
+
       } @else {
         <p class="error-msg">Equipo no encontrado.</p>
       }
@@ -238,18 +270,57 @@ const POSICION_LABEL: Record<string, string> = {
     .rep-num { font-size: 1.3rem; color: var(--color-gold); line-height: 1; }
     .rep-lbl { font-size: .58rem; font-weight: 700; letter-spacing: .06em; color: rgba(255,255,255,.3); text-transform: uppercase; }
     .error-msg { color: #ff6b6b; }
+
+    /* ── Zona peligrosa ── */
+    .danger-zone {
+      border: 1px solid rgba(255,80,80,.2); border-radius: 12px;
+      padding: 1.25rem; margin-top: .5rem;
+    }
+    .btn-eliminar {
+      display: flex; align-items: center; gap: .5rem;
+      background: transparent; border: 1px solid rgba(255,80,80,.35);
+      color: #ff6b6b; padding: .55rem 1.1rem; border-radius: 8px;
+      font-size: .82rem; font-weight: 700; cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-eliminar:hover { background: rgba(255,80,80,.08); border-color: rgba(255,80,80,.6); }
+    .confirm-panel { display: flex; flex-direction: column; gap: .85rem; }
+    .confirm-msg { font-size: .88rem; color: var(--color-light); line-height: 1.5; }
+    .confirm-msg strong { color: #fff; }
+    .confirm-actions { display: flex; gap: .75rem; }
+    .btn-cancel-confirm {
+      padding: .55rem 1.2rem; border-radius: 8px;
+      background: transparent; border: 1px solid rgba(255,255,255,.15);
+      color: var(--color-light); font-size: .85rem; font-weight: 600;
+      cursor: pointer; transition: border-color .2s;
+    }
+    .btn-cancel-confirm:hover:not(:disabled) { border-color: rgba(255,255,255,.35); }
+    .btn-cancel-confirm:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-confirm-delete {
+      padding: .55rem 1.4rem; border-radius: 8px; border: none;
+      background: #c0392b; color: #fff;
+      font-size: .85rem; font-weight: 700; cursor: pointer;
+      transition: filter .2s;
+    }
+    .btn-confirm-delete:hover:not(:disabled) { filter: brightness(1.15); }
+    .btn-confirm-delete:disabled { opacity: .5; cursor: not-allowed; }
+    .error-msg-sm { color: #ff6b6b; font-size: .78rem; }
   `],
 })
 export class EquipoDetalleComponent implements OnInit {
   private route  = inject(ActivatedRoute);
   private svc    = inject(EquiposService);
+  private router = inject(Router);
   readonly auth  = inject(AuthService);
 
-  readonly equipo   = signal<EquipoDetalle | null>(null);
-  readonly loading  = signal(true);
-  readonly buscando = signal(false);
-  readonly resultados = signal<UsuarioPerfil[]>([]);
-  readonly invitando  = signal<string | null>(null);
+  readonly equipo              = signal<EquipoDetalle | null>(null);
+  readonly loading             = signal(true);
+  readonly buscando            = signal(false);
+  readonly resultados          = signal<UsuarioPerfil[]>([]);
+  readonly invitando           = signal<string | null>(null);
+  readonly confirmandoEliminar = signal(false);
+  readonly eliminando          = signal(false);
+  readonly errorEliminar       = signal('');
 
   searchQuery = '';
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -296,6 +367,20 @@ export class EquipoDetalleComponent implements OnInit {
     this.equipo.set(updated);
     this.resultados.set(this.resultados().filter(r => r.id !== u.id));
     this.invitando.set(null);
+  }
+
+  async eliminar(): Promise<void> {
+    const eq = this.equipo();
+    if (!eq) return;
+    this.eliminando.set(true);
+    this.errorEliminar.set('');
+    const error = await this.svc.eliminarEquipo(eq.id);
+    if (error) {
+      this.errorEliminar.set('No se pudo eliminar el equipo. Intenta de nuevo.');
+      this.eliminando.set(false);
+      return;
+    }
+    this.router.navigate(['/app/equipos']);
   }
 
   async cambiarEscudo(event: Event): Promise<void> {
