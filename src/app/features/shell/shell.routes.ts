@@ -53,6 +53,12 @@ export const SHELL_ROUTES: Routes = [
         canActivate: [authGuard],
         loadComponent: () => import('./partidos/partido-detalle.component').then(m => m.PartidoDetalleComponent),
       },
+      // ── Stats ──
+      {
+        path: 'stats',
+        canActivate: [authGuard],
+        loadComponent: () => import('./stats/stats.component').then(m => m.StatsComponent),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

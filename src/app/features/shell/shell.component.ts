@@ -42,6 +42,12 @@ import { Notificacion } from '../../core/models/notificacion.model';
             </svg>
             Mi Perfil
           </a>
+          <a routerLink="/app/stats" routerLinkActive="active">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M18 20V10M12 20V4M6 20v-6"/>
+            </svg>
+            Stats
+          </a>
         </nav>
 
         <div class="shell-user">

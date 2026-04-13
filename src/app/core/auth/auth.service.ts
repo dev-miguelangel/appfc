@@ -1,6 +1,7 @@
 import { inject, Injectable, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { SUPABASE_CLIENT } from '../supabase/supabase.provider';
+import { environment } from '../../../environments/environment';
 
 /** Tipo mínimo compartido entre Session de Supabase y LocalSession del mock */
 export interface AppSession {
@@ -50,10 +51,14 @@ export class AuthService {
 
     this.loading.set(false);
 
-    this.supabase.auth.onAuthStateChange(async (_event: string, session: AppSession | null) => {
+    this.supabase.auth.onAuthStateChange(async (event: string, session: AppSession | null) => {
       this.session.set(session);
       if (session) {
         await this.loadPerfil(session.user.id);
+        // Registrar login OAuth (SIGNED_IN después de callback de Google)
+        if (event === 'SIGNED_IN' && !environment.useLocalDb) {
+          void this.supabase.from('app_eventos').insert({ tipo: 'login', usuario_id: session.user.id });
+        }
       } else {
         this.perfil.set(null);
       }
@@ -83,6 +88,7 @@ export class AuthService {
     if (session) {
       this.session.set(session);
       await this.loadPerfil(session.user.id);
+      void this.registrarEvento('login', session.user.id);
     }
     return null;
   }
@@ -94,8 +100,14 @@ export class AuthService {
     if (session) {
       this.session.set(session);
       await this.loadPerfil(session.user.id);
+      void this.registrarEvento('registro', session.user.id);
     }
     return null;
+  }
+
+  private async registrarEvento(tipo: 'login' | 'registro', usuario_id: string): Promise<void> {
+    if (environment.useLocalDb) return;
+    await this.supabase.from('app_eventos').insert({ tipo, usuario_id });
   }
 
   async logout(): Promise<void> {
