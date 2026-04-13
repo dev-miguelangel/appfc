@@ -152,6 +152,7 @@ type Tab = 'resumen' | 'usuarios' | 'equipos' | 'partidos';
                     <th>Posición</th>
                     <th>Comuna</th>
                     <th>Rep. prom.</th>
+                    <th>Físico</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
@@ -161,11 +162,21 @@ type Tab = 'resumen' | 'usuarios' | 'equipos' | 'partidos';
                     <tr [class.row-blocked]="u.bloqueado">
                       <td>
                         <div class="user-cell">
-                          @if (u.foto_url) {
-                            <img [src]="u.foto_url" class="mini-avatar" alt="" />
-                          } @else {
-                            <div class="mini-avatar-ph">{{ u.nombre?.charAt(0) }}</div>
-                          }
+                          <div class="mini-avatar-wrap">
+                            @if (u.foto_url) {
+                              <img [src]="u.foto_url" class="mini-avatar" alt="" />
+                            } @else {
+                              <div class="mini-avatar-ph">{{ u.nombre?.charAt(0) }}</div>
+                            }
+                            @if (u.lesionado) {
+                              <div class="mini-lesion-dot">
+                                <svg width="7" height="7" fill="white" viewBox="0 0 24 24">
+                                  <rect x="9" y="2" width="6" height="20" rx="2"/>
+                                  <rect x="2" y="9" width="20" height="6" rx="2"/>
+                                </svg>
+                              </div>
+                            }
+                          </div>
                           <div class="user-cell-info">
                             <span class="user-nombre">{{ u.nombre }}</span>
                             @if (u.is_admin) { <span class="badge badge--gold">Admin</span> }
@@ -175,6 +186,19 @@ type Tab = 'resumen' | 'usuarios' | 'equipos' | 'partidos';
                       <td class="td-secondary">{{ u.posicion ?? '—' }}</td>
                       <td class="td-secondary">{{ u.comuna || '—' }}</td>
                       <td class="td-secondary">{{ avgRep(u) }}</td>
+                      <td>
+                        @if (u.lesionado) {
+                          <span class="lesion-tag">
+                            <svg width="9" height="9" fill="currentColor" viewBox="0 0 24 24">
+                              <rect x="9" y="2" width="6" height="20" rx="2"/>
+                              <rect x="2" y="9" width="20" height="6" rx="2"/>
+                            </svg>
+                            LESIONADO
+                          </span>
+                        } @else {
+                          <span class="td-secondary">—</span>
+                        }
+                      </td>
                       <td>
                         @if (u.bloqueado) {
                           <span class="badge badge--red">Bloqueado</span>
@@ -519,12 +543,25 @@ type Tab = 'resumen' | 'usuarios' | 'equipos' | 'partidos';
     .user-cell { display: flex; align-items: center; gap: .65rem; }
     .user-cell-info { display: flex; flex-direction: column; gap: .2rem; }
     .user-nombre { font-weight: 600; }
-    .mini-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .mini-avatar-wrap { position: relative; flex-shrink: 0; }
+    .mini-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; display: block; }
     .mini-avatar-ph {
-      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      width: 30px; height: 30px; border-radius: 50%;
       background: rgba(240,192,64,.15); border: 1px solid rgba(240,192,64,.2);
       display: flex; align-items: center; justify-content: center;
       font-family: 'Bebas Neue', sans-serif; font-size: .9rem; color: var(--color-gold);
+    }
+    .mini-lesion-dot {
+      position: absolute; bottom: -1px; right: -1px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #dc1e1e; border: 1.5px solid #0d1520;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .lesion-tag {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: rgba(220,30,30,.15); border: 1px solid rgba(220,30,30,.35);
+      color: #ff4444; font-size: .6rem; font-weight: 900;
+      letter-spacing: .1em; padding: .2rem .5rem; border-radius: 4px;
     }
 
     /* ── Equipo cell ── */

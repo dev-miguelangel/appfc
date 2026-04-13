@@ -100,18 +100,37 @@ const POSICION_LABEL: Record<string, string> = {
           <h2 class="section-title">Plantilla ({{ activosCount() }})</h2>
           <div class="miembros-list">
             @for (m of miembrosActivos(); track m.id) {
-              <div class="miembro-row" [class.capitan-row]="m.rol === 'capitan'">
-                <div class="m-avatar">
-                  @if (m.usuario.foto_url) {
-                    <img [src]="m.usuario.foto_url" [alt]="m.usuario.nombre" />
-                  } @else {
-                    <span class="font-display">{{ m.usuario.nombre.charAt(0) }}</span>
+              <div class="miembro-row" [class.capitan-row]="m.rol === 'capitan'" [class.lesion-row]="m.usuario.lesionado">
+                <div class="m-avatar-wrap">
+                  <div class="m-avatar">
+                    @if (m.usuario.foto_url) {
+                      <img [src]="m.usuario.foto_url" [alt]="m.usuario.nombre" />
+                    } @else {
+                      <span class="font-display">{{ m.usuario.nombre.charAt(0) }}</span>
+                    }
+                  </div>
+                  @if (m.usuario.lesionado) {
+                    <div class="lesion-badge">
+                      <svg width="9" height="9" fill="white" viewBox="0 0 24 24">
+                        <rect x="9" y="2" width="6" height="20" rx="2"/>
+                        <rect x="2" y="9" width="20" height="6" rx="2"/>
+                      </svg>
+                    </div>
                   }
                 </div>
                 <div class="m-info">
                   <div class="m-nombre">
                     {{ m.usuario.nombre }}
                     @if (m.rol === 'capitan') { <span class="badge-capitan-sm">C</span> }
+                    @if (m.usuario.lesionado) {
+                      <span class="lesion-chip">
+                        <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24">
+                          <rect x="9" y="2" width="6" height="20" rx="2"/>
+                          <rect x="2" y="9" width="20" height="6" rx="2"/>
+                        </svg>
+                        LESIONADO
+                      </span>
+                    }
                   </div>
                   <div class="m-meta">{{ posLabel(m.usuario.posicion) }} · {{ m.usuario.comuna }}</div>
                 </div>
@@ -269,15 +288,39 @@ const POSICION_LABEL: Record<string, string> = {
     .miembro-row {
       display: flex; align-items: center; gap: .85rem;
       padding: .75rem; border-radius: 8px; background: rgba(255,255,255,.03);
+      border-left: 3px solid transparent; transition: border-color .2s, background .2s;
     }
     .miembro-row.capitan-row { background: rgba(240,192,64,.04); }
     .miembro-row.pending { opacity: .6; }
+    .miembro-row.lesion-row {
+      background: rgba(220,30,30,.05);
+      border-left-color: rgba(220,30,30,.5);
+    }
+    .m-avatar-wrap { position: relative; flex-shrink: 0; }
     .m-avatar {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      width: 40px; height: 40px; border-radius: 50%;
       background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
     .m-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .m-avatar span { font-size: 1.1rem; color: var(--color-gold); }
+    .lesion-badge {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #dc1e1e; border: 2px solid #0d1520;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 8px rgba(220,30,30,.7);
+      animation: pulse-badge 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 8px rgba(220,30,30,.7); }
+      50%       { box-shadow: 0 0 14px rgba(220,30,30,1); }
+    }
+    .lesion-chip {
+      display: inline-flex; align-items: center; gap: .25rem;
+      background: rgba(220,30,30,.18); border: 1px solid rgba(220,30,30,.4);
+      color: #ff4444; font-size: .58rem; font-weight: 900;
+      letter-spacing: .1em; padding: .1rem .4rem; border-radius: 3px;
+    }
     .m-info { flex: 1; }
     .m-nombre { font-weight: 600; color: #fff; font-size: .92rem; display: flex; align-items: center; gap: .4rem; }
     .m-meta { font-size: .75rem; color: var(--color-light); margin-top: .1rem; }

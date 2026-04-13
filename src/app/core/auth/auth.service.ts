@@ -20,6 +20,7 @@ export interface UsuarioPerfil {
   rep_compromiso: number;
   is_admin: boolean;
   bloqueado: boolean;
+  lesionado: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

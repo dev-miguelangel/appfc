@@ -22,7 +22,7 @@ export interface EquipoMiembro {
 }
 
 export interface EquipoMiembroConPerfil extends EquipoMiembro {
-  usuario: Pick<UsuarioPerfil, 'id' | 'nombre' | 'posicion' | 'comuna' | 'foto_url' | 'rep_asistencia' | 'rep_puntualidad' | 'rep_compromiso'>;
+  usuario: Pick<UsuarioPerfil, 'id' | 'nombre' | 'posicion' | 'comuna' | 'foto_url' | 'rep_asistencia' | 'rep_puntualidad' | 'rep_compromiso' | 'lesionado'>;
 }
 
 export interface EquipoDetalle extends Equipo {

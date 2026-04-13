@@ -56,6 +56,56 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
                 </div>
               </div>
             </div>
+
+            <!-- ── Estado físico ── -->
+            <div class="estado-fisico">
+              <h3>Estado físico</h3>
+              <div class="estado-card" [class.estado-card--lesionado]="p.lesionado">
+                @if (p.lesionado) {
+                  <div class="estado-icon estado-icon--lesion">
+                    <svg width="22" height="22" fill="white" viewBox="0 0 24 24">
+                      <rect x="9" y="2" width="6" height="20" rx="2.5"/>
+                      <rect x="2" y="9" width="20" height="6" rx="2.5"/>
+                    </svg>
+                  </div>
+                  <div class="estado-info">
+                    <span class="estado-label estado-label--lesion">LESIONADO</span>
+                    <span class="estado-sub">No disponible para partidos</span>
+                  </div>
+                } @else {
+                  <div class="estado-icon estado-icon--ok">
+                    <svg width="22" height="22" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div class="estado-info">
+                    <span class="estado-label estado-label--ok">DISPONIBLE</span>
+                    <span class="estado-sub">Listo para jugar</span>
+                  </div>
+                }
+              </div>
+              <button
+                class="btn-toggle-lesion"
+                [class.btn-toggle-lesion--active]="p.lesionado"
+                [disabled]="busyLesion()"
+                (click)="toggleLesion(p.lesionado)"
+              >
+                @if (busyLesion()) {
+                  Actualizando...
+                } @else if (p.lesionado) {
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Marcar como disponible
+                } @else {
+                  <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="9" y="2" width="6" height="20" rx="2"/>
+                    <rect x="2" y="9" width="20" height="6" rx="2"/>
+                  </svg>
+                  Reportar lesión
+                }
+              </button>
+            </div>
           </div>
 
           <!-- Edit form -->
@@ -141,6 +191,53 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
     .rep-bar-bg { height: 6px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
     .rep-bar { height: 100%; background: linear-gradient(90deg, var(--color-green), rgba(0,208,104,.6)); border-radius: 3px; transition: width .6s ease; }
     .rep-val { font-weight: 700; color: var(--color-gold); text-align: right; }
+
+    /* ── Estado físico ── */
+    .estado-fisico { margin-top: 1.5rem; }
+    .estado-fisico h3 { font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--color-light); margin-bottom: .75rem; }
+    .estado-card {
+      display: flex; align-items: center; gap: .85rem;
+      padding: .9rem 1.1rem; border-radius: 10px;
+      background: rgba(0,208,104,.07); border: 1px solid rgba(0,208,104,.2);
+      margin-bottom: .75rem; transition: background .3s, border-color .3s;
+    }
+    .estado-card--lesionado {
+      background: rgba(220,30,30,.08); border-color: rgba(220,30,30,.3);
+    }
+    .estado-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .estado-icon--ok { background: rgba(0,208,104,.85); box-shadow: 0 0 14px rgba(0,208,104,.4); }
+    .estado-icon--lesion {
+      background: #dc1e1e;
+      box-shadow: 0 0 14px rgba(220,30,30,.55);
+      animation: pulse-lesion 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse-lesion {
+      0%, 100% { box-shadow: 0 0 14px rgba(220,30,30,.55); }
+      50%       { box-shadow: 0 0 22px rgba(220,30,30,.85); }
+    }
+    .estado-info { display: flex; flex-direction: column; gap: .2rem; }
+    .estado-label { font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: .12em; }
+    .estado-label--ok      { color: #00d068; }
+    .estado-label--lesion  { color: #ff4444; }
+    .estado-sub { font-size: .7rem; color: rgba(255,255,255,.35); }
+    .btn-toggle-lesion {
+      width: 100%; padding: .55rem; border-radius: 8px;
+      background: transparent; border: 1px solid rgba(220,30,30,.35);
+      color: #ff6b6b; font-size: .78rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      cursor: pointer; transition: background .2s, border-color .2s;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+    }
+    .btn-toggle-lesion:hover:not(:disabled) { background: rgba(220,30,30,.1); border-color: rgba(220,30,30,.6); }
+    .btn-toggle-lesion--active {
+      border-color: rgba(0,208,104,.35); color: #00d068;
+    }
+    .btn-toggle-lesion--active:hover:not(:disabled) { background: rgba(0,208,104,.08); border-color: rgba(0,208,104,.6); }
+    .btn-toggle-lesion:disabled { opacity: .5; cursor: not-allowed; }
     .edit-card h2 { font-size: 1rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-light); margin-bottom: 1.5rem; }
     .edit-form { display: flex; flex-direction: column; gap: 1.1rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -169,6 +266,7 @@ export class PerfilComponent implements OnInit {
   readonly auth = inject(AuthService);
   readonly comunas = COMUNAS_CHILE;
   readonly busy = signal(false);
+  readonly busyLesion = signal(false);
   readonly errorMsg = signal('');
   readonly successMsg = signal('');
 
@@ -207,6 +305,12 @@ export class PerfilComponent implements OnInit {
       this.successMsg.set('Perfil actualizado correctamente.');
     }
     this.busy.set(false);
+  }
+
+  async toggleLesion(actual: boolean): Promise<void> {
+    this.busyLesion.set(true);
+    await this.auth.savePerfil({ lesionado: !actual });
+    this.busyLesion.set(false);
   }
 
   async uploadFoto(event: Event): Promise<void> {
