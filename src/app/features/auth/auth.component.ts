@@ -103,6 +103,7 @@ import { seedLocalDb, clearSeedLocalDb } from '../../core/local-db/seed';
     .auth-page {
       min-height: 100vh; display: flex; align-items: center; justify-content: center;
       position: relative;
+      padding-top: env(safe-area-inset-top, 0px);
     }
     .auth-bg {
       position: fixed; inset: 0; z-index: 0;

@@ -20,7 +20,8 @@ import { RouterLink } from '@angular/router';
     .nav-bar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 6vw; height: 64px;
+      padding: env(safe-area-inset-top, 0px) 6vw 0;
+      height: calc(64px + env(safe-area-inset-top, 0px));
       background: linear-gradient(to bottom, rgba(8,12,20,.97), transparent);
       backdrop-filter: blur(4px);
     }

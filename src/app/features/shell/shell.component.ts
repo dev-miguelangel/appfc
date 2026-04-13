@@ -188,7 +188,8 @@ import { Notificacion } from '../../core/models/notificacion.model';
     .shell-header {
       position: sticky; top: 0; z-index: 50;
       display: flex; align-items: center; gap: 2rem;
-      padding: 0 2rem; height: 60px;
+      padding: env(safe-area-inset-top, 0px) 2rem 0;
+      height: calc(60px + env(safe-area-inset-top, 0px));
       background: rgba(8,12,20,.95); border-bottom: 1px solid rgba(255,255,255,.07);
       backdrop-filter: blur(8px);
     }
