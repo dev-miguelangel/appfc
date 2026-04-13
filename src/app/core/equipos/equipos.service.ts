@@ -108,14 +108,17 @@ export class EquiposService {
   // ─── Invitar miembro ──────────────────────────────────────────────────────────
 
   async invitarMiembro(equipo_id: string, usuario_id: string): Promise<string | null> {
-    const { error } = await this.db.from('equipo_miembros').insert({
-      id: crypto.randomUUID(),
-      equipo_id,
-      usuario_id,
-      rol: 'jugador',
-      estado: 'pendiente',
-      joined_at: null,
-    });
+    // Upsert: si ya existe (rechazado, etc.) lo resetea a pendiente
+    const { error } = await this.db.from('equipo_miembros').upsert(
+      {
+        equipo_id,
+        usuario_id,
+        rol: 'jugador',
+        estado: 'pendiente',
+        joined_at: null,
+      },
+      { onConflict: 'equipo_id,usuario_id' },
+    );
     return (error as { message: string } | null)?.message ?? null;
   }
 
