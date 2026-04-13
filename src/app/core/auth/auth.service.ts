@@ -18,6 +18,8 @@ export interface UsuarioPerfil {
   rep_asistencia: number;
   rep_puntualidad: number;
   rep_compromiso: number;
+  is_admin: boolean;
+  bloqueado: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +34,7 @@ export class AuthService {
 
   readonly isLoggedIn = computed(() => !!this.session());
   readonly userId = computed(() => this.session()?.user?.id ?? null);
+  readonly isAdmin = computed(() => this.perfil()?.is_admin === true);
   readonly perfilCompleto = computed(() => {
     const p = this.perfil();
     return p !== null && !!p.nombre && !!p.comuna && !!p.posicion && p.edad !== null;

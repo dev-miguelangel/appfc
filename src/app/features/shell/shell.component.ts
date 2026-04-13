@@ -42,12 +42,14 @@ import { Notificacion } from '../../core/models/notificacion.model';
             </svg>
             Mi Perfil
           </a>
-          <a routerLink="/app/stats" routerLinkActive="active">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M18 20V10M12 20V4M6 20v-6"/>
-            </svg>
-            Stats
-          </a>
+          @if (auth.isAdmin()) {
+            <a routerLink="/app/admin" routerLinkActive="active" class="nav-admin">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+              </svg>
+              Admin
+            </a>
+          }
         </nav>
 
         <div class="shell-user">
@@ -180,6 +182,9 @@ import { Notificacion } from '../../core/models/notificacion.model';
     }
     .shell-nav a:hover { color: #fff; background: rgba(255,255,255,.05); }
     .shell-nav a.active { color: var(--color-gold); background: rgba(240,192,64,.08); }
+    .nav-admin { border: 1px solid rgba(240,192,64,.2) !important; }
+    .nav-admin:hover { border-color: rgba(240,192,64,.4) !important; }
+    .nav-admin.active { border-color: rgba(240,192,64,.4) !important; }
 
     /* ── User section ── */
     .shell-user { display: flex; align-items: center; gap: .75rem; margin-left: auto; }

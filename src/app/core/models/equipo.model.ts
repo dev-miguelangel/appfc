@@ -6,6 +6,7 @@ export interface Equipo {
   capitan_id: string;
   escudo_url: string | null;
   created_at: string;
+  bloqueado: boolean;
 }
 
 export type EstadoMiembro = 'pendiente' | 'activo' | 'rechazado';

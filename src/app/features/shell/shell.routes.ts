@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, onboardingGuard } from '../../core/auth/auth.guard';
+import { authGuard, onboardingGuard, adminGuard } from '../../core/auth/auth.guard';
 
 export const SHELL_ROUTES: Routes = [
   {
@@ -53,11 +53,11 @@ export const SHELL_ROUTES: Routes = [
         canActivate: [authGuard],
         loadComponent: () => import('./partidos/partido-detalle.component').then(m => m.PartidoDetalleComponent),
       },
-      // ── Stats ──
+      // ── Admin ──
       {
-        path: 'stats',
-        canActivate: [authGuard],
-        loadComponent: () => import('./stats/stats.component').then(m => m.StatsComponent),
+        path: 'admin',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./admin/admin.component').then(m => m.AdminComponent),
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

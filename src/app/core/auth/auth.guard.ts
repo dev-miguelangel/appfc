@@ -37,3 +37,16 @@ export const publicGuard: CanActivateFn = () => {
   }
   return true;
 };
+
+export const adminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  if (!auth.isLoggedIn()) {
+    return router.createUrlTree(['/auth']);
+  }
+  if (!auth.isAdmin()) {
+    return router.createUrlTree(['/app/dashboard']);
+  }
+  return true;
+};
