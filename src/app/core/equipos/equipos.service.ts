@@ -198,6 +198,38 @@ export class EquiposService {
     return url;
   }
 
+  // ─── Cambiar capitán ─────────────────────────────────────────────────────────
+
+  async cambiarCapitan(equipo_id: string, nuevo_capitan_id: string): Promise<string | null> {
+    const uid = this.auth.userId();
+    if (!uid) return 'No autenticado';
+
+    // 1. Bajar rol del capitán actual a jugador
+    const { error: e1 } = await this.db
+      .from('equipo_miembros')
+      .update({ rol: 'jugador' })
+      .eq('equipo_id', equipo_id)
+      .eq('usuario_id', uid);
+    if (e1) return (e1 as { message: string }).message;
+
+    // 2. Subir al nuevo capitán
+    const { error: e2 } = await this.db
+      .from('equipo_miembros')
+      .update({ rol: 'capitan' })
+      .eq('equipo_id', equipo_id)
+      .eq('usuario_id', nuevo_capitan_id);
+    if (e2) return (e2 as { message: string }).message;
+
+    // 3. Actualizar capitan_id en equipos
+    const { error: e3 } = await this.db
+      .from('equipos')
+      .update({ capitan_id: nuevo_capitan_id })
+      .eq('id', equipo_id);
+    if (e3) return (e3 as { message: string }).message;
+
+    return null;
+  }
+
   // ─── Eliminar equipo ─────────────────────────────────────────────────────────
 
   async eliminarEquipo(equipo_id: string): Promise<string | null> {

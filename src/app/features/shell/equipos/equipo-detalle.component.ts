@@ -119,6 +119,26 @@ const POSICION_LABEL: Record<string, string> = {
                   <div class="rep-num font-display">{{ avgRep(m.usuario) }}</div>
                   <div class="rep-lbl">REP</div>
                 </div>
+                <!-- Botón hacer capitán (solo capitán actual, solo para no-capitanes) -->
+                @if (esCapitan() && m.rol !== 'capitan') {
+                  @if (confirmandoCapitan() === m.usuario_id) {
+                    <div class="capitan-confirm">
+                      <span class="capitan-confirm-txt">¿Nombrar capitán?</span>
+                      <button class="btn-confirm-cap" (click)="confirmarCambioCapitan(m.usuario_id)" [disabled]="cambiandoCapitan()">
+                        {{ cambiandoCapitan() ? '...' : 'Sí' }}
+                      </button>
+                      <button class="btn-cancel-cap" (click)="confirmandoCapitan.set(null)" [disabled]="cambiandoCapitan()">No</button>
+                    </div>
+                  } @else {
+                    <button class="btn-hacer-capitan" (click)="confirmandoCapitan.set(m.usuario_id)" title="Nombrar capitán">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="4"/><path d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/>
+                        <path d="M12 2v2M4.2 4.2l1.4 1.4M2 12H4M4.2 19.8l1.4-1.4" stroke-width="1.5"/>
+                      </svg>
+                      Capitán
+                    </button>
+                  }
+                }
               </div>
             }
           </div>
@@ -266,7 +286,32 @@ const POSICION_LABEL: Record<string, string> = {
       font-size: .6rem; font-weight: 900; padding: .1rem .35rem; border-radius: 3px;
     }
     .pending-badge { color: rgba(240,192,64,.6); }
-    .m-rep { text-align: center; }
+    .m-rep { text-align: center; flex-shrink: 0; }
+    .btn-hacer-capitan {
+      display: flex; align-items: center; gap: .3rem; flex-shrink: 0;
+      background: rgba(240,192,64,.08); border: 1px solid rgba(240,192,64,.25);
+      color: var(--color-gold); padding: .35rem .7rem; border-radius: 6px;
+      font-size: .72rem; font-weight: 700; cursor: pointer;
+      transition: background .2s; white-space: nowrap;
+    }
+    .btn-hacer-capitan:hover { background: rgba(240,192,64,.18); }
+    .capitan-confirm {
+      display: flex; align-items: center; gap: .4rem; flex-shrink: 0;
+    }
+    .capitan-confirm-txt { font-size: .72rem; color: var(--color-light); white-space: nowrap; }
+    .btn-confirm-cap {
+      background: var(--color-gold); color: var(--color-dark); border: none;
+      padding: .3rem .65rem; border-radius: 5px; font-size: .72rem; font-weight: 800;
+      cursor: pointer; transition: filter .2s;
+    }
+    .btn-confirm-cap:hover:not(:disabled) { filter: brightness(1.1); }
+    .btn-confirm-cap:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-cancel-cap {
+      background: transparent; border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.5); padding: .3rem .65rem; border-radius: 5px;
+      font-size: .72rem; font-weight: 600; cursor: pointer;
+    }
+    .btn-cancel-cap:hover:not(:disabled) { border-color: rgba(255,255,255,.35); }
     .rep-num { font-size: 1.3rem; color: var(--color-gold); line-height: 1; }
     .rep-lbl { font-size: .58rem; font-weight: 700; letter-spacing: .06em; color: rgba(255,255,255,.3); text-transform: uppercase; }
     .error-msg { color: #ff6b6b; }
@@ -318,9 +363,11 @@ export class EquipoDetalleComponent implements OnInit {
   readonly buscando            = signal(false);
   readonly resultados          = signal<UsuarioPerfil[]>([]);
   readonly invitando           = signal<string | null>(null);
-  readonly confirmandoEliminar = signal(false);
-  readonly eliminando          = signal(false);
-  readonly errorEliminar       = signal('');
+  readonly confirmandoEliminar  = signal(false);
+  readonly eliminando           = signal(false);
+  readonly errorEliminar        = signal('');
+  readonly confirmandoCapitan   = signal<string | null>(null);
+  readonly cambiandoCapitan     = signal(false);
 
   searchQuery = '';
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -367,6 +414,23 @@ export class EquipoDetalleComponent implements OnInit {
     this.equipo.set(updated);
     this.resultados.set(this.resultados().filter(r => r.id !== u.id));
     this.invitando.set(null);
+  }
+
+  async confirmarCambioCapitan(nuevo_capitan_id: string): Promise<void> {
+    const eq = this.equipo();
+    if (!eq) return;
+    this.cambiandoCapitan.set(true);
+    const error = await this.svc.cambiarCapitan(eq.id, nuevo_capitan_id);
+    if (error) {
+      this.cambiandoCapitan.set(false);
+      this.confirmandoCapitan.set(null);
+      return;
+    }
+    // Recargar para reflejar nuevo capitán
+    const updated = await this.svc.getEquipo(eq.id);
+    this.equipo.set(updated);
+    this.cambiandoCapitan.set(false);
+    this.confirmandoCapitan.set(null);
   }
 
   async eliminar(): Promise<void> {
