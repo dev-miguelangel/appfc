@@ -31,16 +31,23 @@ import { PartidosService } from '../../../core/partidos/partidos.service';
               <div class="stat-lbl">Equipos</div>
             </div>
           </a>
-          <div class="stat-card rep-card">
+          <div class="stat-card rep-card desktop-only">
             <div class="stat-icon">⭐</div>
             <div class="stat-info">
               <div class="stat-num font-display">{{ avgRep(p) }}</div>
               <div class="stat-lbl">Reputacion promedio</div>
             </div>
           </div>
+          <a routerLink="/app/perfil" class="stat-card stat-link perfil-card mobile-only">
+            <div class="stat-icon">👤</div>
+            <div class="stat-info">
+              <div class="stat-lbl perfil-lbl">Mi Perfil</div>
+              <div class="perfil-name">{{ p.nombre }}</div>
+            </div>
+          </a>
         </div>
 
-        <div class="quick-actions">
+        <div class="quick-actions desktop-only">
           <h2 class="section-label font-display">Acciones rápidas</h2>
           <div class="actions-grid">
             <a routerLink="/app/partidos/nuevo" class="action-card">
@@ -89,6 +96,15 @@ import { PartidosService } from '../../../core/partidos/partidos.service';
     .empty-state p { color: var(--color-light); font-size: .95rem; }
     .stat-link { text-decoration: none; transition: border-color .2s; }
     .stat-link:hover { border-color: rgba(240,192,64,.3); }
+    .perfil-card { border-color: rgba(240,192,64,.15); }
+    .perfil-lbl { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--color-light); }
+    .perfil-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--color-gold); line-height: 1.1; margin-top: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .desktop-only { display: flex; }
+    .mobile-only  { display: none; }
+    @media (max-width: 600px) {
+      .desktop-only { display: none !important; }
+      .mobile-only  { display: flex !important; }
+    }
     .section-label { font-size: 1.2rem; color: #fff; margin-bottom: 1rem; }
     .quick-actions { margin-top: .5rem; }
     .actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
