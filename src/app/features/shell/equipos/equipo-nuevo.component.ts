@@ -139,15 +139,28 @@ export class EquipoNuevoComponent {
     this.busy.set(true);
 
     const result = await this.svc.crearEquipo(this.nombre().trim());
+
     if (!result) {
       this.errorMsg.set('Error al crear el equipo. Intenta de nuevo.');
       this.busy.set(false);
       return;
     }
 
+    if (result.error) {
+      this.errorMsg.set(result.error);
+      this.busy.set(false);
+      return;
+    }
+
     // Subir escudo si fue seleccionado
     if (this.escudoFile) {
-      await this.svc.uploadEscudo(result.id, this.escudoFile);
+      const url = await this.svc.uploadEscudo(result.id, this.escudoFile);
+      if (!url) {
+        // El equipo se creó; avisamos del problema con la imagen pero seguimos
+        this.errorMsg.set('Equipo creado, pero no se pudo subir el escudo. Puedes subirlo desde el detalle.');
+        setTimeout(() => this.router.navigate(['/app/equipos', result.id]), 2000);
+        return;
+      }
     }
 
     this.router.navigate(['/app/equipos', result.id]);

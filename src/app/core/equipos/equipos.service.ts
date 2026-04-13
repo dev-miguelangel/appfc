@@ -71,7 +71,7 @@ export class EquiposService {
 
   // ─── Crear equipo ─────────────────────────────────────────────────────────────
 
-  async crearEquipo(nombre: string, escudo_url?: string): Promise<{ id: string } | null> {
+  async crearEquipo(nombre: string, escudo_url?: string): Promise<{ id: string; error?: string } | null> {
     const uid = this.auth.userId();
     if (!uid) return null;
 
@@ -83,7 +83,13 @@ export class EquiposService {
       escudo_url: escudo_url ?? null,
       created_at: new Date().toISOString(),
     });
-    if (error) return null;
+    if (error) {
+      const msg = (error as { message: string }).message ?? '';
+      if (msg.includes('equipos_nombre_unico') || msg.includes('unique')) {
+        return { id: '', error: 'Ya existe un equipo con ese nombre. Elige otro.' };
+      }
+      return null;
+    }
 
     // Insertar capitan como miembro activo
     await this.db.from('equipo_miembros').insert({
