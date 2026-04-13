@@ -90,7 +90,7 @@ import { Notificacion } from '../../core/models/notificacion.model';
             @if (p.foto_url) {
               <img [src]="p.foto_url" class="user-avatar" alt="avatar" />
             } @else {
-              <div class="user-avatar-placeholder">{{ p.nombre.charAt(0) }}</div>
+              <div class="user-avatar-placeholder">{{ p.nombre?.charAt(0) ?? '?' }}</div>
             }
             <span class="user-name">{{ p.nombre }}</span>
           }
