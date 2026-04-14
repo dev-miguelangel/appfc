@@ -7,6 +7,7 @@ export interface Equipo {
   escudo_url: string | null;
   created_at: string;
   bloqueado: boolean;
+  codigo: string | null;
 }
 
 export type EstadoMiembro = 'pendiente' | 'activo' | 'rechazado';

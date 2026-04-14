@@ -43,6 +43,9 @@ const POSICION_LABEL: Record<string, string> = {
             <div class="equipo-meta">
               <span class="badge-count">{{ activosCount() }} jugadores</span>
               @if (esCapitan()) { <span class="badge-capitan">Capitan</span> }
+              @if (equipo()!.codigo) {
+                <span class="badge-codigo">{{ equipo()!.codigo }}</span>
+              }
             </div>
           </div>
         </div>
@@ -248,6 +251,12 @@ const POSICION_LABEL: Record<string, string> = {
       background: rgba(240,192,64,.12); border: 1px solid rgba(240,192,64,.3);
       color: var(--color-gold); font-size: .65rem; font-weight: 800;
       letter-spacing: .08em; text-transform: uppercase; padding: .15rem .5rem; border-radius: 4px;
+    }
+    .badge-codigo {
+      font-family: 'Courier New', monospace; font-size: .72rem; font-weight: 700;
+      color: rgba(255,255,255,.45); background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1); padding: .15rem .55rem; border-radius: 4px;
+      letter-spacing: .1em;
     }
     .invite-section, .miembros-section {
       background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
