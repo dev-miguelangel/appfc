@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { SUPABASE_CLIENT } from '../supabase/supabase.provider';
 import { AuthService, UsuarioPerfil } from '../auth/auth.service';
 import {
-  Equipo, EquipoDetalle, EquipoMiembro, EquipoMiembroConPerfil,
+  Equipo, EquipoBusquedaResult, EquipoDetalle, EquipoMiembro, EquipoMiembroConPerfil,
 } from '../models/equipo.model';
 
 @Injectable({ providedIn: 'root' })
@@ -178,6 +178,123 @@ export class EquiposService {
     }
 
     return resultados;
+  }
+
+  // ─── Buscar equipos (para postular) ──────────────────────────────────────────
+
+  readonly PAGE_SIZE = 5;
+
+  async buscarEquipos(
+    query: string,
+    page: number,
+  ): Promise<{ resultados: EquipoBusquedaResult[]; total: number }> {
+    const uid  = this.auth.userId();
+    const from = page * this.PAGE_SIZE;
+    const to   = from + this.PAGE_SIZE - 1;
+
+    const { data, count } = await this.db
+      .from('equipos')
+      .select('*', { count: 'exact' })
+      .or(`nombre.ilike.%${query}%,codigo.ilike.%${query}%`)
+      .eq('bloqueado', false)
+      .order('nombre', { ascending: true })
+      .range(from, to);
+
+    const equipos: Equipo[] = data ?? [];
+
+    if (!equipos.length) return { resultados: [], total: 0 };
+
+    const ids = equipos.map(e => e.id);
+
+    // Contar miembros activos por equipo
+    const { data: activosData } = await this.db
+      .from('equipo_miembros')
+      .select('equipo_id')
+      .in('equipo_id', ids)
+      .eq('estado', 'activo');
+
+    const activosPorEquipo = new Map<string, number>();
+    for (const m of (activosData ?? []) as { equipo_id: string }[]) {
+      activosPorEquipo.set(m.equipo_id, (activosPorEquipo.get(m.equipo_id) ?? 0) + 1);
+    }
+
+    // Estado del usuario en cada equipo
+    const miEstadoMap = new Map<string, 'activo' | 'pendiente'>();
+    if (uid) {
+      const { data: myData } = await this.db
+        .from('equipo_miembros')
+        .select('equipo_id, estado')
+        .eq('usuario_id', uid)
+        .in('equipo_id', ids)
+        .in('estado', ['activo', 'pendiente']);
+
+      for (const m of (myData ?? []) as { equipo_id: string; estado: string }[]) {
+        miEstadoMap.set(m.equipo_id, m.estado as 'activo' | 'pendiente');
+      }
+    }
+
+    const resultados: EquipoBusquedaResult[] = equipos.map(e => ({
+      equipo:          e,
+      miembrosActivos: activosPorEquipo.get(e.id) ?? 0,
+      miEstado:        miEstadoMap.get(e.id) ?? null,
+    }));
+
+    return { resultados, total: count ?? 0 };
+  }
+
+  // ─── Postular a un equipo ────────────────────────────────────────────────────
+
+  async postularAEquipo(equipoId: string): Promise<string | null> {
+    const uid = this.auth.userId();
+    if (!uid) return 'No autenticado';
+
+    // Verificar que no sea el capitán ni ya miembro/pendiente
+    const { data: equipo } = await this.db
+      .from('equipos').select('capitan_id, nombre').eq('id', equipoId).single();
+    if (!equipo) return 'Equipo no encontrado';
+    if ((equipo as { capitan_id: string }).capitan_id === uid) return 'Eres el capitán de este equipo';
+
+    const { data: existe } = await this.db
+      .from('equipo_miembros')
+      .select('id, estado')
+      .eq('equipo_id', equipoId)
+      .eq('usuario_id', uid)
+      .maybeSingle();
+
+    if (existe) {
+      const e = existe as { estado: string };
+      if (e.estado === 'activo')   return 'Ya eres miembro de este equipo';
+      if (e.estado === 'pendiente') return 'Ya tienes una solicitud pendiente';
+    }
+
+    const { error } = await this.db.from('equipo_miembros').insert({
+      equipo_id:  equipoId,
+      usuario_id: uid,
+      rol:        'jugador',
+      estado:     'pendiente',
+      origen:     'postulacion',
+      joined_at:  null,
+    });
+    if (error) return (error as { message: string }).message;
+
+    // Notificar al capitán
+    const { data: perfil } = await this.db
+      .from('usuarios').select('nombre').eq('id', uid).single();
+    const nombreSolicitante = (perfil as { nombre: string } | null)?.nombre ?? 'Un jugador';
+    const nombreEquipo      = (equipo as { nombre: string }).nombre;
+
+    await this.db.from('notificaciones').insert({
+      id:         crypto.randomUUID(),
+      usuario_id: (equipo as { capitan_id: string }).capitan_id,
+      tipo:       'postulacion_nueva',
+      mensaje:    `${nombreSolicitante} quiere unirse a tu equipo "${nombreEquipo}"`,
+      equipo_id:  equipoId,
+      partido_id: null,
+      leida:      false,
+      created_at: new Date().toISOString(),
+    });
+
+    return null;
   }
 
   // ─── Subir escudo ─────────────────────────────────────────────────────────────

@@ -5,7 +5,8 @@ export type TipoNotificacion =
   | 'partido_rechazado'
   | 'solicitud_nueva'
   | 'solicitud_aprobada'
-  | 'solicitud_rechazada';
+  | 'solicitud_rechazada'
+  | 'postulacion_nueva';
 
 export interface Notificacion {
   id: string;
@@ -13,6 +14,7 @@ export interface Notificacion {
   tipo: TipoNotificacion;
   mensaje: string;
   partido_id: string | null;
+  equipo_id:  string | null;
   leida: boolean;
   created_at: string;
 }

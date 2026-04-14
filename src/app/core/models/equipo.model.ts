@@ -19,7 +19,14 @@ export interface EquipoMiembro {
   usuario_id: string;
   rol: RolEquipo;
   estado: EstadoMiembro;
+  origen: 'invitacion' | 'postulacion';
   joined_at: string | null;
+}
+
+export interface EquipoBusquedaResult {
+  equipo: Equipo;
+  miembrosActivos: number;
+  miEstado: 'activo' | 'pendiente' | null;
 }
 
 export interface EquipoMiembroConPerfil extends EquipoMiembro {

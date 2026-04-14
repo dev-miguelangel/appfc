@@ -485,6 +485,7 @@ export class ShellComponent implements OnDestroy {
     if (!n.leida) await this.notif.marcarLeida(n.id);
     this.mostrarNotif.set(false);
     if (n.partido_id) void this.router.navigate(['/app/partidos', n.partido_id]);
+    else if (n.equipo_id) void this.router.navigate(['/app/equipos', n.equipo_id]);
   }
 
   tipoIcon(tipo: string): string {
@@ -495,6 +496,7 @@ export class ShellComponent implements OnDestroy {
       solicitud_nueva:     '📋',
       solicitud_aprobada:  '✅',
       solicitud_rechazada: '❌',
+      postulacion_nueva:   '🏃',
     };
     return map[tipo] ?? '✏️';
   }
