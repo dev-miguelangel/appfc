@@ -55,7 +55,7 @@ const POSICION_LABEL: Record<string, string> = {
               <input
                 type="text" [(ngModel)]="searchQuery"
                 (input)="buscar()"
-                placeholder="Buscar por nombre..."
+                placeholder="Buscar por nombre, nickname o correo..."
                 class="form-input"
               />
             </div>

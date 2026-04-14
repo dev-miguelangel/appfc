@@ -132,7 +132,7 @@ type Tab = 'resumen' | 'usuarios' | 'equipos' | 'partidos';
             <input
               class="search-input"
               type="text"
-              placeholder="Buscar por nombre..."
+              placeholder="Buscar por nombre, nickname o correo..."
               [value]="busquedaUsuarios()"
               (input)="busquedaUsuarios.set($any($event.target).value)"
             />
@@ -674,7 +674,11 @@ export class AdminComponent implements OnInit {
   usuariosFiltrados(): UsuarioPerfil[] {
     const q = this.busquedaUsuarios().trim().toLowerCase();
     if (!q) return this.usuarios();
-    return this.usuarios().filter(u => u.nombre?.toLowerCase().includes(q));
+    return this.usuarios().filter(u =>
+      u.nombre?.toLowerCase().includes(q) ||
+      u.nickname?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q)
+    );
   }
 
   equiposFiltrados(): AdminEquipo[] {

@@ -22,6 +22,7 @@ export interface UsuarioPerfil {
   bloqueado: boolean;
   lesionado: boolean;
   nickname: string | null;
+  email: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

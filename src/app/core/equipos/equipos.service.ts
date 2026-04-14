@@ -157,7 +157,7 @@ export class EquiposService {
     const { data } = await this.db
       .from('usuarios')
       .select('*')
-      .ilike('nombre', `%${query}%`)
+      .or(`nombre.ilike.%${query}%,nickname.ilike.%${query}%,email.ilike.%${query}%`)
       .neq('id', uid)
       .limit(10);
 
