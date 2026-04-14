@@ -30,6 +30,12 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
               </label>
             </div>
 
+            @if (p.nickname) {
+              <div class="nickname-wrap">
+                <span class="nickname-hash">#</span><span class="nickname-val">{{ p.nickname }}</span>
+              </div>
+            }
+
             <div class="rep-section">
               <h3>Reputacion</h3>
               <div class="rep-bars">
@@ -169,7 +175,13 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
       background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
       border-radius: 14px; padding: 1.75rem;
     }
-    .avatar-wrap { position: relative; display: flex; justify-content: center; margin-bottom: 1.5rem; }
+    .avatar-wrap { position: relative; display: flex; justify-content: center; margin-bottom: 1rem; }
+    .nickname-wrap {
+      display: flex; align-items: baseline; justify-content: center; gap: .1rem;
+      margin-bottom: 1.25rem;
+    }
+    .nickname-hash { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: rgba(240,192,64,.5); }
+    .nickname-val  { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--color-gold); letter-spacing: .15em; }
     .avatar-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(240,192,64,.3); }
     .avatar-placeholder {
       width: 100px; height: 100px; border-radius: 50%;

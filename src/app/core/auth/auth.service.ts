@@ -21,6 +21,7 @@ export interface UsuarioPerfil {
   is_admin: boolean;
   bloqueado: boolean;
   lesionado: boolean;
+  nickname: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

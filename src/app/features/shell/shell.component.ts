@@ -108,7 +108,12 @@ import { Notificacion } from '../../core/models/notificacion.model';
             } @else {
               <div class="user-avatar-placeholder">{{ p.nombre?.charAt(0) ?? '?' }}</div>
             }
-            <span class="user-name">{{ p.nombre }}</span>
+            <div class="user-info">
+              <span class="user-name">{{ p.nombre }}</span>
+              @if (p.nickname) {
+                <span class="user-nick">#{{ p.nickname }}</span>
+              }
+            </div>
           }
           <button class="btn-logout" (click)="auth.logout()" title="Cerrar sesion">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -239,7 +244,9 @@ import { Notificacion } from '../../core/models/notificacion.model';
       display: flex; align-items: center; justify-content: center;
       font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--color-gold);
     }
-    .user-name { font-size: .85rem; font-weight: 600; color: var(--color-light); }
+    .user-info { display: flex; flex-direction: column; gap: .05rem; }
+    .user-name { font-size: .85rem; font-weight: 600; color: var(--color-light); line-height: 1.2; }
+    .user-nick { font-size: .65rem; font-weight: 700; color: rgba(240,192,64,.55); letter-spacing: .08em; font-family: 'Bebas Neue', sans-serif; }
     .btn-logout {
       background: transparent; border: none; color: rgba(255,255,255,.35);
       cursor: pointer; padding: .35rem; border-radius: 6px;
