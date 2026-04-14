@@ -36,6 +36,7 @@ import { RouterLink } from '@angular/router';
             ⚽ Empieza gratis
           </a>
           <a [routerLink]="['/']" fragment="how" class="btn-secondary clip-skew">▶ Como funciona</a>
+          <a routerLink="/comunidad" class="btn-community clip-skew">🏆 Ver Comunidad</a>
         </div>
 
         <div class="hero-stats">
@@ -154,6 +155,15 @@ import { RouterLink } from '@angular/router';
       transition: border-color .2s, background .2s;
     }
     .btn-secondary:hover { border-color: var(--color-gold); background: rgba(240,192,64,.06); }
+    .btn-community {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: rgba(240,192,64,.1); color: var(--color-gold);
+      border: 1px solid rgba(240,192,64,.3); padding: .9rem 2rem;
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: .1em;
+      cursor: pointer; text-decoration: none;
+      transition: border-color .2s, background .2s;
+    }
+    .btn-community:hover { border-color: var(--color-gold); background: rgba(240,192,64,.16); }
     .hero-stats {
       display: flex; gap: 2.5rem; margin-top: 3.5rem;
       padding-top: 2rem; border-top: 1px solid rgba(255,255,255,.08);

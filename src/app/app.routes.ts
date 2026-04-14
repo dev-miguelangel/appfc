@@ -19,6 +19,11 @@ export const routes: Routes = [
       import('./features/auth/callback.component').then(m => m.AuthCallbackComponent),
   },
   {
+    path: 'comunidad',
+    loadComponent: () =>
+      import('./features/comunidad/comunidad.component').then(m => m.ComunidadComponent),
+  },
+  {
     path: 'app',
     loadChildren: () =>
       import('./features/shell/shell.routes').then(m => m.SHELL_ROUTES),

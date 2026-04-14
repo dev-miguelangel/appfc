@@ -43,6 +43,13 @@ import { Notificacion } from '../../core/models/notificacion.model';
             </svg>
             Mi Perfil
           </a>
+          <a routerLink="/comunidad" routerLinkActive="active">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Comunidad
+          </a>
           @if (auth.isAdmin()) {
             <a routerLink="/app/admin" routerLinkActive="active" class="nav-admin">
               <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -165,6 +172,13 @@ import { Notificacion } from '../../core/models/notificacion.model';
             <path d="M2 12h20"/>
           </svg>
           <span>Partidos</span>
+        </a>
+        <a routerLink="/comunidad" routerLinkActive="active" class="bottom-nav-item">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Comunidad</span>
         </a>
         <a routerLink="/app/perfil" routerLinkActive="active" class="bottom-nav-item">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
