@@ -23,6 +23,9 @@ export interface UsuarioPerfil {
   lesionado: boolean;
   nickname: string | null;
   email: string | null;
+  visible_equipos: boolean;
+  visible_reemplazos: boolean;
+  visible_partidos: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

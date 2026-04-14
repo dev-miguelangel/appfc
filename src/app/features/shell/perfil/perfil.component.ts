@@ -112,6 +112,15 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
                 }
               </button>
             </div>
+
+            <!-- ── Visibilidad ── -->
+            <button class="btn-visibilidad" (click)="modalVis.set(true)">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              Visibilidad
+            </button>
           </div>
 
           <!-- Edit form -->
@@ -163,6 +172,85 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
             </form>
           </div>
         </div>
+
+        <!-- ── Modal Visibilidad ── -->
+        @if (modalVis()) {
+          <div class="modal-backdrop" (click)="modalVis.set(false)"></div>
+          <div class="modal-vis">
+            <div class="modal-vis-header">
+              <h3 class="modal-vis-title">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Visibilidad
+              </h3>
+              <button class="modal-vis-close" (click)="modalVis.set(false)">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <p class="modal-vis-desc">
+              Controla en qué contextos otros jugadores y capitanes pueden encontrarte.
+            </p>
+
+            <div class="vis-options">
+              <label class="vis-option" [class.vis-on]="visForm.visible_equipos">
+                <div class="vis-option-info">
+                  <span class="vis-icon">🏃</span>
+                  <div>
+                    <span class="vis-label">Invitaciones a equipos</span>
+                    <span class="vis-sublabel">Los capitanes pueden invitarte a unirte a su equipo</span>
+                  </div>
+                </div>
+                <div class="toggle-wrap">
+                  <input type="checkbox" [(ngModel)]="visForm.visible_equipos" (change)="saveVis()" class="toggle-input" />
+                  <span class="toggle-track" [class.on]="visForm.visible_equipos">
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </div>
+              </label>
+
+              <label class="vis-option" [class.vis-on]="visForm.visible_reemplazos">
+                <div class="vis-option-info">
+                  <span class="vis-icon">⚡</span>
+                  <div>
+                    <span class="vis-label">Reemplazos</span>
+                    <span class="vis-sublabel">Apareces disponible cuando un equipo busca reemplazo de urgencia</span>
+                  </div>
+                </div>
+                <div class="toggle-wrap">
+                  <input type="checkbox" [(ngModel)]="visForm.visible_reemplazos" (change)="saveVis()" class="toggle-input" />
+                  <span class="toggle-track" [class.on]="visForm.visible_reemplazos">
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </div>
+              </label>
+
+              <label class="vis-option" [class.vis-on]="visForm.visible_partidos">
+                <div class="vis-option-info">
+                  <span class="vis-icon">⚽</span>
+                  <div>
+                    <span class="vis-label">Partidos</span>
+                    <span class="vis-sublabel">Te pueden convocar directamente a partidos sin ser del equipo</span>
+                  </div>
+                </div>
+                <div class="toggle-wrap">
+                  <input type="checkbox" [(ngModel)]="visForm.visible_partidos" (change)="saveVis()" class="toggle-input" />
+                  <span class="toggle-track" [class.on]="visForm.visible_partidos">
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            @if (visMsg()) {
+              <p class="vis-saved">{{ visMsg() }}</p>
+            }
+          </div>
+        }
       }
     </div>
   `,
@@ -250,6 +338,83 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
     }
     .btn-toggle-lesion--active:hover:not(:disabled) { background: rgba(0,208,104,.08); border-color: rgba(0,208,104,.6); }
     .btn-toggle-lesion:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Botón visibilidad ── */
+    .btn-visibilidad {
+      width: 100%; margin-top: .75rem; padding: .55rem;
+      border-radius: 8px; border: 1px solid rgba(255,255,255,.12);
+      background: transparent; color: rgba(255,255,255,.55);
+      font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .btn-visibilidad:hover { border-color: rgba(255,255,255,.3); color: #fff; background: rgba(255,255,255,.05); }
+
+    /* ── Modal visibilidad ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.65);
+      backdrop-filter: blur(4px); z-index: 100;
+    }
+    .modal-vis {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 101; width: min(440px, calc(100vw - 2rem));
+      background: #141a24; border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px; padding: 1.75rem;
+      box-shadow: 0 24px 80px rgba(0,0,0,.8);
+    }
+    .modal-vis-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem;
+    }
+    .modal-vis-title {
+      display: flex; align-items: center; gap: .5rem;
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem;
+      color: #fff; letter-spacing: .08em; margin: 0;
+    }
+    .modal-vis-close {
+      background: transparent; border: none; color: rgba(255,255,255,.35);
+      cursor: pointer; padding: .25rem; border-radius: 6px; display: flex;
+      transition: color .2s, background .2s;
+    }
+    .modal-vis-close:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .modal-vis-desc { font-size: .8rem; color: rgba(255,255,255,.4); margin: 0 0 1.25rem; line-height: 1.5; }
+
+    /* Opciones toggle */
+    .vis-options { display: flex; flex-direction: column; gap: .6rem; }
+    .vis-option {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px; padding: .9rem 1rem; cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .vis-option:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.14); }
+    .vis-option.vis-on { border-color: rgba(0,210,104,.2); background: rgba(0,210,104,.04); }
+
+    .vis-option-info { display: flex; align-items: flex-start; gap: .75rem; flex: 1; min-width: 0; }
+    .vis-icon { font-size: 1.35rem; flex-shrink: 0; margin-top: .05rem; }
+    .vis-label { display: block; font-size: .85rem; font-weight: 700; color: #e0e0e0; line-height: 1.2; }
+    .vis-sublabel { display: block; font-size: .7rem; color: rgba(255,255,255,.35); margin-top: .2rem; line-height: 1.4; }
+
+    /* Toggle switch */
+    .toggle-wrap { flex-shrink: 0; position: relative; }
+    .toggle-input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      display: block; width: 42px; height: 24px; border-radius: 12px;
+      background: rgba(255,255,255,.12); transition: background .2s;
+      position: relative; cursor: pointer;
+    }
+    .toggle-track.on { background: #00d068; }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: transform .2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    }
+    .toggle-track.on .toggle-thumb { transform: translateX(18px); }
+
+    .vis-saved {
+      margin: .85rem 0 0; font-size: .75rem; font-weight: 700;
+      color: #00d068; text-align: center; letter-spacing: .04em;
+    }
     .edit-card h2 { font-size: 1rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-light); margin-bottom: 1.5rem; }
     .edit-form { display: flex; flex-direction: column; gap: 1.1rem; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -279,6 +444,14 @@ export class PerfilComponent implements OnInit {
   readonly comunas = COMUNAS_CHILE;
   readonly busy = signal(false);
   readonly busyLesion = signal(false);
+  readonly modalVis   = signal(false);
+  readonly visMsg     = signal('');
+
+  visForm = {
+    visible_equipos:    true,
+    visible_reemplazos: true,
+    visible_partidos:   true,
+  };
   readonly errorMsg = signal('');
   readonly successMsg = signal('');
 
@@ -296,6 +469,9 @@ export class PerfilComponent implements OnInit {
       this.form.edad = p.edad;
       this.form.posicion = p.posicion ?? '';
       this.form.comuna = p.comuna ?? '';
+      this.visForm.visible_equipos    = p.visible_equipos    ?? true;
+      this.visForm.visible_reemplazos = p.visible_reemplazos ?? true;
+      this.visForm.visible_partidos   = p.visible_partidos   ?? true;
     }
   }
 
@@ -317,6 +493,17 @@ export class PerfilComponent implements OnInit {
       this.successMsg.set('Perfil actualizado correctamente.');
     }
     this.busy.set(false);
+  }
+
+  async saveVis(): Promise<void> {
+    this.visMsg.set('');
+    await this.auth.savePerfil({
+      visible_equipos:    this.visForm.visible_equipos,
+      visible_reemplazos: this.visForm.visible_reemplazos,
+      visible_partidos:   this.visForm.visible_partidos,
+    });
+    this.visMsg.set('Configuración guardada');
+    setTimeout(() => this.visMsg.set(''), 2500);
   }
 
   async toggleLesion(actual: boolean): Promise<void> {
