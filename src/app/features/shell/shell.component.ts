@@ -246,7 +246,7 @@ import { Notificacion } from '../../core/models/notificacion.model';
     }
     .user-info { display: flex; flex-direction: column; gap: .05rem; }
     .user-name { font-size: .85rem; font-weight: 600; color: var(--color-light); line-height: 1.2; }
-    .user-nick { font-size: .65rem; font-weight: 700; color: rgba(240,192,64,.55); letter-spacing: .08em; font-family: 'Bebas Neue', sans-serif; }
+    .user-nick { font-size: .65rem; font-weight: 700; color: rgba(240,192,64,.55); letter-spacing: .08em; font-family: 'Courier New', monospace; }
     .btn-logout {
       background: transparent; border: none; color: rgba(255,255,255,.35);
       cursor: pointer; padding: .35rem; border-radius: 6px;

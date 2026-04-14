@@ -180,8 +180,8 @@ import { COMUNAS_CHILE } from '../../../core/data/comunas';
       display: flex; align-items: baseline; justify-content: center; gap: .1rem;
       margin-bottom: 1.25rem;
     }
-    .nickname-hash { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: rgba(240,192,64,.5); }
-    .nickname-val  { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--color-gold); letter-spacing: .15em; }
+    .nickname-hash { font-size: 1rem; font-weight: 700; color: rgba(240,192,64,.5); }
+    .nickname-val  { font-size: 1.15rem; font-weight: 800; color: var(--color-gold); letter-spacing: .2em; font-family: 'Courier New', monospace; }
     .avatar-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(240,192,64,.3); }
     .avatar-placeholder {
       width: 100px; height: 100px; border-radius: 50%;
