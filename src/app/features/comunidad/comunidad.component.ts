@@ -1,6 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ComunidadService } from '../../core/comunidad/comunidad.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { PartidoPublico, BoletinData } from '../../core/models/comunidad.model';
 import { PartidoPublicoCardComponent } from './components/partido-publico-card.component';
 import { BoletinComponent } from './components/boletin.component';
@@ -12,14 +13,16 @@ type Tab = 'en-vivo' | 'proximos' | 'resultados' | 'boletin';
   standalone: true,
   imports: [RouterLink, PartidoPublicoCardComponent, BoletinComponent],
   template: `
-    <div class="comunidad-page">
-      <!-- ── Topbar ── -->
-      <header class="com-header">
-        <a routerLink="/" class="com-logo">App<span>FC</span></a>
-        <div class="com-header-right">
-          <a routerLink="/auth" class="btn-join">Únete gratis</a>
-        </div>
-      </header>
+    <div class="comunidad-page" [class.dentro-shell]="auth.isLoggedIn()">
+      <!-- ── Topbar (solo usuarios no autenticados) ── -->
+      @if (!auth.isLoggedIn()) {
+        <header class="com-header">
+          <a routerLink="/" class="com-logo">App<span>FC</span></a>
+          <div class="com-header-right">
+            <a routerLink="/auth" class="btn-join">Únete gratis</a>
+          </div>
+        </header>
+      }
 
       <!-- ── Hero banner ── -->
       <div class="hero-banner">
@@ -114,22 +117,26 @@ type Tab = 'en-vivo' | 'proximos' | 'resultados' | 'boletin';
 
       </div>
 
-      <!-- ── CTA footer ── -->
-      <div class="cta-banner">
-        <div class="cta-content">
-          <div class="cta-text">
-            <strong>¿Quieres jugar?</strong>
-            <span>Registra tu equipo, programa partidos y sube tus estadísticas.</span>
+      <!-- ── CTA footer (solo usuarios no autenticados) ── -->
+      @if (!auth.isLoggedIn()) {
+        <div class="cta-banner">
+          <div class="cta-content">
+            <div class="cta-text">
+              <strong>¿Quieres jugar?</strong>
+              <span>Registra tu equipo, programa partidos y sube tus estadísticas.</span>
+            </div>
+            <a routerLink="/auth" class="btn-cta">Crear cuenta gratis</a>
           </div>
-          <a routerLink="/auth" class="btn-cta">Crear cuenta gratis</a>
         </div>
-      </div>
+      }
     </div>
   `,
   styles: [`
     .comunidad-page {
       min-height: 100vh; background: var(--color-dark); display: flex; flex-direction: column;
     }
+    /* Cuando está dentro del shell, quitar el fondo duplicado y ajustar min-height */
+    .dentro-shell { min-height: unset; background: transparent; }
 
     /* ── Header ── */
     .com-header {
@@ -243,7 +250,9 @@ type Tab = 'en-vivo' | 'proximos' | 'resultados' | 'boletin';
   `],
 })
 export class ComunidadComponent implements OnInit, OnDestroy {
-  private svc = inject(ComunidadService);
+  private svc    = inject(ComunidadService);
+  private router = inject(Router);
+  readonly auth  = inject(AuthService);
 
   readonly tab       = signal<Tab>('en-vivo');
   readonly loading   = signal(false);
@@ -260,6 +269,11 @@ export class ComunidadComponent implements OnInit, OnDestroy {
   };
 
   async ngOnInit(): Promise<void> {
+    // Si el usuario está logueado y accede a /comunidad (pública), redirigir a /app/comunidad
+    if (this.auth.isLoggedIn() && !this.router.url.startsWith('/app')) {
+      void this.router.navigate(['/app/comunidad'], { replaceUrl: true });
+      return;
+    }
     await this.cargarTab(this.tab());
     // Polling en vivo cada 60s
     this.pollInterval = setInterval(() => {

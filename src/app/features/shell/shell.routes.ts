@@ -53,6 +53,11 @@ export const SHELL_ROUTES: Routes = [
         canActivate: [authGuard],
         loadComponent: () => import('./partidos/partido-detalle.component').then(m => m.PartidoDetalleComponent),
       },
+      // ── Comunidad (pública, sin authGuard) ──
+      {
+        path: 'comunidad',
+        loadComponent: () => import('../comunidad/comunidad.component').then(m => m.ComunidadComponent),
+      },
       // ── Admin ──
       {
         path: 'admin',
