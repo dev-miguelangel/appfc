@@ -2,9 +2,11 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
+
+  await auth.waitForInit();
 
   if (auth.isLoggedIn()) {
     if (!auth.perfilCompleto()) {
@@ -15,9 +17,11 @@ export const authGuard: CanActivateFn = () => {
   return router.createUrlTree(['/auth']);
 };
 
-export const onboardingGuard: CanActivateFn = () => {
+export const onboardingGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
+
+  await auth.waitForInit();
 
   if (!auth.isLoggedIn()) {
     return router.createUrlTree(['/auth']);
@@ -28,9 +32,11 @@ export const onboardingGuard: CanActivateFn = () => {
   return true;
 };
 
-export const publicGuard: CanActivateFn = () => {
+export const publicGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
+
+  await auth.waitForInit();
 
   if (auth.isLoggedIn()) {
     return router.createUrlTree(['/app/dashboard']);
@@ -38,9 +44,11 @@ export const publicGuard: CanActivateFn = () => {
   return true;
 };
 
-export const adminGuard: CanActivateFn = () => {
+export const adminGuard: CanActivateFn = async () => {
   const auth = inject(AuthService);
   const router = inject(Router);
+
+  await auth.waitForInit();
 
   if (!auth.isLoggedIn()) {
     return router.createUrlTree(['/auth']);

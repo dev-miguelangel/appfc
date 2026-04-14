@@ -41,8 +41,15 @@ export class AuthService {
     return p !== null && !!p.nombre && !!p.comuna && !!p.posicion && p.edad !== null;
   });
 
+  private readonly initPromise: Promise<void>;
+
   constructor() {
-    this.init();
+    this.initPromise = this.init();
+  }
+
+  /** Esperar a que la sesión inicial esté resuelta (necesario en guards al hacer refresh) */
+  waitForInit(): Promise<void> {
+    return this.initPromise;
   }
 
   private async init(): Promise<void> {
