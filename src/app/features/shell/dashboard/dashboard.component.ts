@@ -106,7 +106,7 @@ import { PartidosService } from '../../../core/partidos/partidos.service';
       .mobile-only  { display: flex !important; }
     }
     .section-label { font-size: 1.2rem; color: #fff; margin-bottom: 1rem; }
-    .quick-actions { margin-top: .5rem; }
+    .quick-actions { margin-top: .5rem; display: block !important; }
     .actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     @media (max-width: 600px) { .actions-grid { grid-template-columns: 1fr; } }
     .action-card {
